@@ -1,0 +1,56 @@
+<view class="page">
+  <!-- 顶部导航 -->
+  <view class="header">
+    <view class="logo-box">YMG</view>
+    <text class="header-title">羊毛梗船舶服务中心信息发布平台</text>
+  </view>
+
+  <!-- 轮播图 -->
+  <swiper class="banner-swiper" indicator-dots autoplay circular interval="3000">
+    <swiper-item wx:for="{{banners}}" wx:key="id">
+      <image class="banner-img" src="{{item.image}}" mode="aspectFill" />
+    </swiper-item>
+  </swiper>
+
+  <!-- 吨位筛选标签 -->
+  <view class="filter-bar">
+    <view
+      class="filter-tag {{currentFilter === index ? 'active' : ''}}"
+      wx:for="{{filters}}"
+      wx:key="index"
+      bindtap="onFilterTap"
+      data-index="{{index}}"
+    >
+      {{item.label}}
+    </view>
+  </view>
+
+  <!-- 搜索栏 -->
+  <view class="search-bar">
+    <input
+      class="search-input"
+      placeholder="搜索船舶编号/船型..."
+      value="{{searchKey}}"
+      bindinput="onSearchInput"
+      confirm-type="search"
+      bindconfirm="onSearch"
+    />
+    <view class="search-btn" bindtap="onSearch">搜索</view>
+  </view>
+
+  <!-- 船舶卡片列表 -->
+  <view class="ship-grid">
+    <view class="ship-card" wx:for="{{shipList}}" wx:key="id" bindtap="goDetail" data-id="{{item.id}}">
+      <image class="ship-img" src="{{item.images[0] || '/images/ship-placeholder.png'}}" mode="aspectFill" />
+      <view class="ship-info">
+        <text class="ship-tonnage">{{item.deadweight}}吨</text>
+        <text class="ship-price">{{item.price}}万元</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{shipList.length === 0}}">
+    <text class="empty-text">暂无船舶信息</text>
+  </view>
+</view>

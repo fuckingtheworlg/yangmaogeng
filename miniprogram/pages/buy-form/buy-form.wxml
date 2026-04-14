@@ -1,0 +1,82 @@
+<view class="page">
+  <!-- 顶部导航 -->
+  <view class="nav-bar">
+    <view class="nav-back" bindtap="goBack">
+      <text class="arrow">‹</text>
+    </view>
+    <view class="logo-box">YMG</view>
+    <text class="nav-title">羊毛梗船舶服务中心信息发布平台</text>
+  </view>
+
+  <scroll-view scroll-y class="form-scroll">
+    <view class="form-title">购买信息填写</view>
+
+    <view class="form-section">
+      <!-- 称呼 -->
+      <view class="form-row">
+        <text class="form-label">你的称呼</text>
+        <input class="form-input" placeholder="请输入称呼" value="{{form.contact_name}}" bindinput="onInput" data-field="contact_name" />
+        <view class="gender-group">
+          <view class="gender-item {{form.gender === '先生' ? 'active' : ''}}" bindtap="setGender" data-val="先生">先生</view>
+          <view class="gender-item {{form.gender === '女士' ? 'active' : ''}}" bindtap="setGender" data-val="女士">女士</view>
+        </view>
+      </view>
+
+      <!-- 联系电话 -->
+      <view class="form-row">
+        <text class="form-label">联系电话</text>
+        <input class="form-input" placeholder="请输入电话" type="number" value="{{form.phone}}" bindinput="onInput" data-field="phone" />
+      </view>
+
+      <!-- 总长 -->
+      <view class="form-row">
+        <text class="form-label">总长</text>
+        <input class="form-input" placeholder="米" type="digit" value="{{form.total_length}}" bindinput="onInput" data-field="total_length" />
+      </view>
+
+      <!-- 吨位 -->
+      <view class="form-row multi">
+        <view class="form-item">
+          <text class="form-label">吨位</text>
+          <input class="form-input-sm" placeholder="吨" type="number" value="{{form.deadweight}}" bindinput="onInput" data-field="deadweight" />
+        </view>
+        <view class="form-item">
+          <text class="form-label">总吨</text>
+          <input class="form-input-sm" placeholder="吨" type="number" value="{{form.gross_tonnage}}" bindinput="onInput" data-field="gross_tonnage" />
+        </view>
+      </view>
+
+      <!-- 主机 -->
+      <view class="form-row multi">
+        <view class="form-item">
+          <text class="form-label">主机马力</text>
+          <input class="form-input-sm" placeholder="KW" type="number" value="{{form.engine_power}}" bindinput="onInput" data-field="engine_power" />
+        </view>
+        <view class="form-item">
+          <text class="form-label">主机品牌</text>
+          <input class="form-input-sm" placeholder="如潍柴" value="{{form.engine_brand}}" bindinput="onInput" data-field="engine_brand" />
+        </view>
+      </view>
+
+      <!-- 预算 -->
+      <view class="form-row">
+        <text class="form-label">预算</text>
+        <input class="form-input" placeholder="万元" type="digit" value="{{form.budget}}" bindinput="onInput" data-field="budget" />
+      </view>
+
+      <!-- 备注 -->
+      <view class="form-row-textarea">
+        <text class="form-label">备注</text>
+        <textarea class="form-textarea" placeholder="请输入其他需求说明..." value="{{form.remark}}" bindinput="onInput" data-field="remark" />
+      </view>
+    </view>
+
+    <view style="height: 160rpx;"></view>
+  </scroll-view>
+
+  <!-- 底部 -->
+  <view class="bottom-bar safe-bottom">
+    <view class="submit-btn" bindtap="submitForm">委托</view>
+    <text class="contact-text">联系方式：13600000000</text>
+  </view>
+</view>

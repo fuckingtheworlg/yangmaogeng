@@ -1,0 +1,50 @@
+<view class="page">
+  <!-- 顶部导航 -->
+  <view class="header">
+    <view class="logo-box">YMG</view>
+    <text class="header-title">羊毛梗船舶服务中心信息发布平台</text>
+  </view>
+
+  <!-- 用户信息 -->
+  <view class="user-section">
+    <view class="avatar-box">
+      <image class="avatar" src="{{userInfo.avatarUrl || '/images/tab-profile.png'}}" />
+    </view>
+    <text class="username">{{userInfo.nickName || '用户姓名'}}</text>
+  </view>
+
+  <!-- Tab 切换 -->
+  <view class="tab-bar">
+    <view class="tab-item {{currentTab === 0 ? 'active' : ''}}" bindtap="switchTab" data-index="0">
+      我的收藏
+    </view>
+    <view class="tab-item {{currentTab === 1 ? 'active' : ''}}" bindtap="switchTab" data-index="1">
+      我的委托
+    </view>
+  </view>
+
+  <!-- 收藏列表 -->
+  <view class="list" wx:if="{{currentTab === 0}}">
+    <view class="list-item" wx:for="{{favorites}}" wx:key="id" bindtap="goDetail" data-id="{{item.ship_id}}">
+      <text class="item-no">编号：{{item.ship_no}}</text>
+      <text class="item-tonnage">{{item.deadweight}}吨</text>
+      <text class="item-price">{{item.price}}万元</text>
+    </view>
+    <view class="empty" wx:if="{{favorites.length === 0}}">
+      <text class="empty-text">暂无收藏</text>
+    </view>
+  </view>
+
+  <!-- 委托列表 -->
+  <view class="list" wx:if="{{currentTab === 1}}">
+    <view class="list-item" wx:for="{{commissions}}" wx:key="id">
+      <text class="item-no">编号：{{item.ship_no || item.id}}</text>
+      <text class="item-type {{item.type === 'sell' ? 'type-sell' : 'type-buy'}}">
+        {{item.type === 'sell' ? '出售' : '求购'}}
+      </text>
+    </view>
+    <view class="empty" wx:if="{{commissions.length === 0}}">
+      <text class="empty-text">暂无委托</text>
+    </view>
+  </view>
+</view>

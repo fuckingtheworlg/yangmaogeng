@@ -1,0 +1,179 @@
+.page {
+  background-color: #f5f5f5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-bar {
+  background-color: #CC0000;
+  padding: 20rpx 30rpx;
+  display: flex;
+  align-items: center;
+  padding-top: calc(20rpx + env(safe-area-inset-top));
+}
+
+.nav-back {
+  width: 56rpx;
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10rpx;
+}
+
+.arrow {
+  color: #fff;
+  font-size: 48rpx;
+  font-weight: bold;
+}
+
+.logo-box {
+  width: 50rpx;
+  height: 50rpx;
+  background-color: #fff;
+  color: #CC0000;
+  font-size: 20rpx;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6rpx;
+  margin-right: 12rpx;
+  flex-shrink: 0;
+}
+
+.nav-title {
+  color: #fff;
+  font-size: 28rpx;
+  font-weight: bold;
+}
+
+.form-scroll {
+  flex: 1;
+}
+
+.form-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  padding: 30rpx;
+  color: #333;
+}
+
+.form-section {
+  background-color: #fff;
+  padding: 0 30rpx;
+}
+
+.form-row {
+  display: flex;
+  align-items: center;
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.form-row.multi {
+  flex-wrap: wrap;
+  gap: 20rpx;
+}
+
+.form-row-textarea {
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.form-item {
+  display: flex;
+  align-items: center;
+}
+
+.form-label {
+  font-size: 26rpx;
+  color: #333;
+  width: 140rpx;
+  flex-shrink: 0;
+}
+
+.form-item .form-label {
+  width: auto;
+  margin-right: 12rpx;
+}
+
+.form-input {
+  flex: 1;
+  height: 64rpx;
+  padding: 0 16rpx;
+  border: 1rpx solid #ddd;
+  border-radius: 6rpx;
+  font-size: 26rpx;
+}
+
+.form-input-sm {
+  width: 140rpx;
+  height: 64rpx;
+  padding: 0 16rpx;
+  border: 1rpx solid #ddd;
+  border-radius: 6rpx;
+  font-size: 26rpx;
+  text-align: center;
+}
+
+.form-textarea {
+  width: 100%;
+  height: 200rpx;
+  padding: 16rpx;
+  border: 1rpx solid #ddd;
+  border-radius: 6rpx;
+  font-size: 26rpx;
+  margin-top: 16rpx;
+  box-sizing: border-box;
+}
+
+.gender-group {
+  display: flex;
+  gap: 16rpx;
+  margin-left: 16rpx;
+}
+
+.gender-item {
+  padding: 10rpx 24rpx;
+  border: 1rpx solid #ddd;
+  border-radius: 6rpx;
+  font-size: 24rpx;
+  color: #666;
+}
+
+.gender-item.active {
+  border-color: #CC0000;
+  color: #CC0000;
+  background-color: #fff5f5;
+}
+
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100rpx;
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  border-top: 1rpx solid #eee;
+  padding: 0 30rpx;
+  z-index: 100;
+}
+
+.submit-btn {
+  padding: 16rpx 60rpx;
+  background-color: #CC0000;
+  color: #fff;
+  border-radius: 8rpx;
+  font-size: 30rpx;
+  font-weight: bold;
+  margin-right: 30rpx;
+}
+
+.contact-text {
+  font-size: 26rpx;
+  color: #666;
+}

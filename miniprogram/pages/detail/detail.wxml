@@ -1,0 +1,127 @@
+<view class="page">
+  <!-- 顶部导航 -->
+  <view class="nav-bar">
+    <view class="nav-back" bindtap="goBack">
+      <text class="arrow">‹</text>
+    </view>
+    <view class="logo-box">YMG</view>
+    <text class="nav-title">羊毛梗船舶服务中心信息发布平台</text>
+  </view>
+
+  <scroll-view scroll-y class="content">
+    <!-- 船舶编号 -->
+    <view class="section">
+      <view class="info-row">
+        <text class="label">船舶编号：</text>
+        <text class="value">{{ship.ship_no}}</text>
+      </view>
+    </view>
+
+    <!-- 基本参数 -->
+    <view class="section">
+      <view class="params-grid">
+        <view class="param-item">
+          <text class="label">总长：</text>
+          <text class="value">{{ship.total_length}}米</text>
+        </view>
+        <view class="param-item">
+          <text class="label">型宽：</text>
+          <text class="value">{{ship.width}}米</text>
+        </view>
+        <view class="param-item">
+          <text class="label">型深：</text>
+          <text class="value">{{ship.depth}}米</text>
+        </view>
+      </view>
+      <view class="params-grid">
+        <view class="param-item">
+          <text class="label">船型：</text>
+          <text class="value">{{ship.ship_type}}</text>
+        </view>
+        <view class="param-item">
+          <text class="label">船况：</text>
+          <text class="value">{{ship.ship_condition}}</text>
+        </view>
+      </view>
+      <view class="params-grid">
+        <view class="param-item">
+          <text class="label">载重吨：</text>
+          <text class="value">{{ship.deadweight}}吨</text>
+        </view>
+        <view class="param-item">
+          <text class="label">总吨：</text>
+          <text class="value">{{ship.gross_tonnage}}吨</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 建造信息 -->
+    <view class="section">
+      <view class="params-grid">
+        <view class="param-item">
+          <text class="label">建造时间：</text>
+          <text class="value">{{ship.build_date}}</text>
+        </view>
+      </view>
+      <view class="params-grid">
+        <view class="param-item">
+          <text class="label">建造省：</text>
+          <text class="value">{{ship.build_province}}</text>
+        </view>
+        <view class="param-item">
+          <text class="label">港籍：</text>
+          <text class="value">{{ship.port_registry}}</text>
+        </view>
+        <view class="param-item">
+          <text class="label">水域：</text>
+          <text class="value">{{ship.water_type}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 主机信息 -->
+    <view class="section">
+      <view class="params-grid">
+        <view class="param-item">
+          <text class="label">主机品牌：</text>
+          <text class="value text-bold">{{ship.engine_brand}}</text>
+        </view>
+        <view class="param-item">
+          <text class="label">主机功力：</text>
+          <text class="value">{{ship.engine_power}}KW</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 估价 -->
+    <view class="section price-section">
+      <text class="label">估价：</text>
+      <text class="price-value">{{ship.price}}万元</text>
+    </view>
+
+    <!-- 船舶图片 -->
+    <view class="section">
+      <view class="ship-images">
+        <image
+          wx:for="{{ship.images}}"
+          wx:key="index"
+          class="ship-image"
+          src="{{item}}"
+          mode="aspectFill"
+          bindtap="previewImage"
+          data-url="{{item}}"
+        />
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 底部操作栏 -->
+  <view class="bottom-bar safe-bottom">
+    <view class="fav-btn {{isFavorited ? 'active' : ''}}" bindtap="toggleFavorite">
+      <text>{{isFavorited ? '已收藏' : '收藏'}}</text>
+    </view>
+    <view class="contact-info" bindtap="callPhone">
+      <text>联系方式：{{ship.contact_phone}}</text>
+    </view>
+  </view>
+</view>

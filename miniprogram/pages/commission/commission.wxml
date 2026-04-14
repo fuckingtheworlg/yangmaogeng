@@ -1,0 +1,25 @@
+<view class="page">
+  <!-- 顶部导航 -->
+  <view class="header">
+    <view class="logo-box">YMG</view>
+    <text class="header-title">羊毛梗船舶服务中心信息发布平台</text>
+  </view>
+
+  <view class="content">
+    <!-- 出售入口 -->
+    <view class="card" bindtap="goSellForm">
+      <image class="card-img" src="/images/ship-placeholder.png" mode="aspectFill" />
+      <view class="card-btn">
+        <text>信息出售</text>
+      </view>
+    </view>
+
+    <!-- 购买入口 -->
+    <view class="card" bindtap="goBuyForm">
+      <image class="card-img card-img-red" src="/images/ship-placeholder.png" mode="aspectFill" />
+      <view class="card-btn">
+        <text>信息购买</text>
+      </view>
+    </view>
+  </view>
+</view>

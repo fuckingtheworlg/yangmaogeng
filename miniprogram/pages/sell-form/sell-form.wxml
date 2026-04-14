@@ -1,0 +1,149 @@
+<view class="page">
+  <!-- 顶部导航 -->
+  <view class="nav-bar">
+    <view class="nav-back" bindtap="goBack">
+      <text class="arrow">‹</text>
+    </view>
+    <view class="logo-box">YMG</view>
+    <text class="nav-title">羊毛梗船舶服务中心信息发布平台</text>
+  </view>
+
+  <scroll-view scroll-y class="form-scroll">
+    <view class="form-title">出售信息填写</view>
+
+    <view class="form-section">
+      <!-- 称呼 -->
+      <view class="form-row">
+        <text class="form-label">你的称呼</text>
+        <input class="form-input" placeholder="请输入称呼" value="{{form.contact_name}}" bindinput="onInput" data-field="contact_name" />
+        <view class="gender-group">
+          <view class="gender-item {{form.gender === '先生' ? 'active' : ''}}" bindtap="setGender" data-val="先生">先生</view>
+          <view class="gender-item {{form.gender === '女士' ? 'active' : ''}}" bindtap="setGender" data-val="女士">女士</view>
+        </view>
+      </view>
+
+      <!-- 联系电话 -->
+      <view class="form-row">
+        <text class="form-label">联系电话</text>
+        <input class="form-input" placeholder="请输入电话" type="number" value="{{form.phone}}" bindinput="onInput" data-field="phone" />
+      </view>
+
+      <!-- 尺寸 -->
+      <view class="form-row multi">
+        <view class="form-item">
+          <text class="form-label">总长</text>
+          <input class="form-input-sm" placeholder="米" type="digit" value="{{form.total_length}}" bindinput="onInput" data-field="total_length" />
+        </view>
+        <view class="form-item">
+          <text class="form-label">型宽</text>
+          <input class="form-input-sm" placeholder="米" type="digit" value="{{form.width}}" bindinput="onInput" data-field="width" />
+        </view>
+        <view class="form-item">
+          <text class="form-label">型深</text>
+          <input class="form-input-sm" placeholder="米" type="digit" value="{{form.depth}}" bindinput="onInput" data-field="depth" />
+        </view>
+      </view>
+
+      <!-- 吨位 -->
+      <view class="form-row multi">
+        <view class="form-item">
+          <text class="form-label">总吨</text>
+          <input class="form-input-sm" placeholder="吨" type="number" value="{{form.gross_tonnage}}" bindinput="onInput" data-field="gross_tonnage" />
+        </view>
+        <view class="form-item">
+          <text class="form-label">载重吨</text>
+          <input class="form-input-sm" placeholder="吨" type="number" value="{{form.deadweight}}" bindinput="onInput" data-field="deadweight" />
+        </view>
+      </view>
+
+      <!-- 建造时间 -->
+      <view class="form-row">
+        <text class="form-label">建造时间</text>
+        <picker mode="date" fields="month" value="{{form.build_date}}" bindchange="onDateChange">
+          <view class="form-picker">{{form.build_date || '请选择'}}</view>
+        </picker>
+      </view>
+
+      <!-- 建造省份 -->
+      <view class="form-row">
+        <text class="form-label">建造省份</text>
+        <input class="form-input" placeholder="请输入" value="{{form.build_province}}" bindinput="onInput" data-field="build_province" />
+      </view>
+
+      <!-- 水域类型 -->
+      <view class="form-row">
+        <text class="form-label">水域类型</text>
+        <view class="radio-group">
+          <view class="radio-item {{form.water_type === '内河' ? 'active' : ''}}" bindtap="setWaterType" data-val="内河">内河</view>
+          <view class="radio-item {{form.water_type === '近海' ? 'active' : ''}}" bindtap="setWaterType" data-val="近海">近海</view>
+        </view>
+      </view>
+
+      <!-- 船型 -->
+      <view class="form-row">
+        <text class="form-label">船型</text>
+        <picker range="{{shipTypes}}" value="{{shipTypeIndex}}" bindchange="onShipTypeChange">
+          <view class="form-picker">{{form.ship_type || '请选择船型'}}</view>
+        </picker>
+      </view>
+
+      <!-- 主机信息 -->
+      <view class="form-row multi">
+        <view class="form-item">
+          <text class="form-label">主机品牌</text>
+          <input class="form-input-sm" placeholder="如潍柴" value="{{form.engine_brand}}" bindinput="onInput" data-field="engine_brand" />
+        </view>
+        <view class="form-item">
+          <text class="form-label">主机功力</text>
+          <input class="form-input-sm" placeholder="KW" type="number" value="{{form.engine_power}}" bindinput="onInput" data-field="engine_power" />
+        </view>
+      </view>
+    </view>
+
+    <!-- 船舶照片上传 -->
+    <view class="upload-section">
+      <text class="upload-title">船舶照片上传</text>
+      <view class="upload-area">
+        <image
+          wx:for="{{shipImages}}"
+          wx:key="index"
+          class="upload-preview"
+          src="{{item}}"
+          mode="aspectFill"
+          bindlongpress="deleteShipImage"
+          data-index="{{index}}"
+        />
+        <view class="upload-btn" bindtap="chooseShipImage" wx:if="{{shipImages.length < 9}}">
+          <text class="upload-icon">+</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 证书照片上传 -->
+    <view class="upload-section">
+      <text class="upload-title">证书照片上传</text>
+      <view class="upload-area">
+        <image
+          wx:for="{{certImages}}"
+          wx:key="index"
+          class="upload-preview"
+          src="{{item}}"
+          mode="aspectFill"
+          bindlongpress="deleteCertImage"
+          data-index="{{index}}"
+        />
+        <view class="upload-btn" bindtap="chooseCertImage" wx:if="{{certImages.length < 9}}">
+          <text class="upload-icon">+</text>
+        </view>
+      </view>
+    </view>
+
+    <view style="height: 160rpx;"></view>
+  </scroll-view>
+
+  <!-- 底部 -->
+  <view class="bottom-bar safe-bottom">
+    <view class="submit-btn" bindtap="submitForm">委托</view>
+    <text class="contact-text">联系方式：13600000000</text>
+  </view>
+</view>
