@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================
-# Nginx 反向代理配置
+# Nginx 配置：管理后台前端 + API 反向代理
 # ============================================
 set -e
 
@@ -13,14 +13,42 @@ elif command -v apt &> /dev/null; then
     apt install -y nginx
 fi
 
-echo "配置反向代理..."
+echo "替换 Nginx 主配置（清除默认 server 冲突）..."
+cat > /etc/nginx/nginx.conf << 'MAINCONF'
+user nginx;
+worker_processes auto;
+error_log /var/log/nginx/error.log;
+pid /run/nginx.pid;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include /etc/mime.types;
+    default_type application/octet-stream;
+    sendfile on;
+    keepalive_timeout 65;
+    client_max_body_size 20m;
+    include /etc/nginx/conf.d/*.conf;
+}
+MAINCONF
+
+echo "配置站点..."
 cat > /etc/nginx/conf.d/yaomaogeng.conf << 'EOF'
 server {
     listen 80;
     server_name _;
 
-    client_max_body_size 20m;
+    # 管理后台前端（Vue3 SPA）
+    root /opt/yaomaogeng/admin/dist;
+    index index.html;
 
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # 后端 API 反向代理
     location /api/ {
         proxy_pass http://127.0.0.1:3000;
         proxy_set_header Host $host;
@@ -30,6 +58,7 @@ server {
         proxy_read_timeout 120s;
     }
 
+    # 上传文件静态访问
     location /uploads/ {
         proxy_pass http://127.0.0.1:3000;
         proxy_set_header Host $host;
@@ -41,8 +70,10 @@ nginx -t && echo "Nginx 配置检查通过"
 systemctl enable nginx
 systemctl restart nginx
 
+PUBLIC_IP=$(curl -s ifconfig.me 2>/dev/null || hostname -I | awk '{print $1}')
 echo ""
-echo "Nginx 配置完成！"
-echo "API 访问地址: http://$(hostname -I | awk '{print $1}')/api/ships"
+echo "配置完成！"
+echo "  管理后台: http://$PUBLIC_IP/"
+echo "  API 接口: http://$PUBLIC_IP/api/ships"
 echo ""
-echo "[提示] 域名备案完成后，修改 /etc/nginx/conf.d/yaomaogeng.conf 中的 server_name"
+echo "  管理员账号: admin / admin123"
