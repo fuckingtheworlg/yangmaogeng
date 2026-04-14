@@ -91,7 +91,7 @@
 
   <!-- 空状态 -->
   <view class="empty-state" wx:if="{{shipList.length === 0}}">
-    <image class="empty-img" src="/images/empty-state.jpg" mode="aspectFit" />
+    <image class="empty-img" src="/images/empty-state.png" mode="aspectFit" />
     <text class="empty-text">暂无船舶信息</text>
   </view>
 
