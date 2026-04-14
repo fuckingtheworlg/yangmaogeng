@@ -26,25 +26,35 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { mockShips, mockCommissions } from '../../utils/mock'
+import { ref, onMounted } from 'vue'
+import { getStats } from '../../api/admin'
 
-const shipCount = ref(mockShips.length)
-const requestCount = ref(mockCommissions.length)
+const shipCount = ref(0)
+const requestCount = ref(0)
+
+onMounted(async () => {
+  try {
+    const res = await getStats()
+    if (res.code === 200) {
+      shipCount.value = res.data.shipCount || 0
+      requestCount.value = res.data.todayCommissions || 0
+    }
+  } catch (e) {
+    console.error('获取统计数据失败', e)
+  }
+})
 </script>
 
 <style scoped>
 .dashboard {
   padding: 20px;
 }
-
 .welcome {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-bottom: 40px;
 }
-
 .logo-text {
   background: #CC0000;
   color: #fff;
@@ -53,20 +63,17 @@ const requestCount = ref(mockCommissions.length)
   padding: 4px 8px;
   border-radius: 4px;
 }
-
 .welcome-title {
   font-size: 20px;
   font-weight: bold;
   color: #333;
 }
-
 .stats-row {
   display: flex;
   flex-direction: column;
   gap: 20px;
   max-width: 500px;
 }
-
 .stat-card {
   background: #fff;
   padding: 24px 32px;
@@ -74,29 +81,24 @@ const requestCount = ref(mockCommissions.length)
   cursor: pointer;
   transition: box-shadow 0.2s;
 }
-
 .stat-card:hover {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
-
 .stat-label {
   font-size: 16px;
   color: #666;
   margin-bottom: 8px;
 }
-
 .stat-num {
   font-size: 24px;
   font-weight: bold;
   color: #333;
 }
-
 .stat-unit {
   font-size: 14px;
   color: #333;
   margin-left: 4px;
 }
-
 .stat-link {
   font-size: 14px;
   color: #999;

@@ -3,10 +3,10 @@
     <div class="filter-bar">
       <el-input v-model="filters.id" placeholder="编号" style="width: 120px" clearable />
       <el-input v-model="filters.phone" placeholder="电话" style="width: 160px" clearable />
-      <el-button type="primary" @click="handleSearch" :icon="Search">搜索</el-button>
+      <el-button type="primary" @click="fetchData" :icon="Search">搜索</el-button>
     </div>
 
-    <el-table :data="tableData" border stripe style="width: 100%" size="small">
+    <el-table :data="tableData" border stripe style="width: 100%" size="small" v-loading="loading">
       <el-table-column prop="id" label="编号" width="80" />
       <el-table-column prop="nickname" label="用户名" width="120" />
       <el-table-column prop="phone" label="电话" width="140" />
@@ -27,50 +27,80 @@
       </el-form>
       <template #footer>
         <el-button @click="formVisible = false">取消</el-button>
-        <el-button type="danger" @click="handleSave">保存</el-button>
+        <el-button type="danger" @click="handleSave" :loading="saving">保存</el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { mockUsers } from '../../utils/mock'
+import { getUsers, updateUser, deleteUser } from '../../api/admin'
 
-const allData = ref([...mockUsers])
+const tableData = ref([])
+const loading = ref(false)
+const saving = ref(false)
 const filters = ref({ id: '', phone: '' })
 const formVisible = ref(false)
 const userForm = ref({ nickname: '', phone: '' })
 
-const tableData = computed(() => {
-  let data = allData.value
-  if (filters.value.id) data = data.filter(d => String(d.id).includes(filters.value.id))
-  if (filters.value.phone) data = data.filter(d => d.phone.includes(filters.value.phone))
-  return data
-})
-
-function handleSearch() {}
+async function fetchData() {
+  loading.value = true
+  try {
+    const params = {}
+    if (filters.value.id) params.id = filters.value.id
+    if (filters.value.phone) params.phone = filters.value.phone
+    const res = await getUsers(params)
+    if (res.code === 200) {
+      tableData.value = res.data.list || []
+    }
+  } catch (e) {
+    ElMessage.error('获取数据失败')
+  } finally {
+    loading.value = false
+  }
+}
 
 function handleEdit(row) {
   userForm.value = { ...row }
   formVisible.value = true
 }
 
-function handleSave() {
-  const idx = allData.value.findIndex(d => d.id === userForm.value.id)
-  if (idx !== -1) allData.value[idx] = { ...userForm.value }
-  ElMessage.success('保存成功')
-  formVisible.value = false
+async function handleSave() {
+  saving.value = true
+  try {
+    const res = await updateUser(userForm.value.id, { nickname: userForm.value.nickname, phone: userForm.value.phone })
+    if (res.code === 200) {
+      ElMessage.success('保存成功')
+      formVisible.value = false
+      fetchData()
+    } else {
+      ElMessage.error(res.message || '保存失败')
+    }
+  } catch (e) {
+    ElMessage.error('保存失败')
+  } finally {
+    saving.value = false
+  }
 }
 
 function handleDelete(row) {
-  ElMessageBox.confirm('确定删除该用户？', '提示', { type: 'warning' }).then(() => {
-    allData.value = allData.value.filter(d => d.id !== row.id)
-    ElMessage.success('删除成功')
+  ElMessageBox.confirm('确定删除该用户？', '提示', { type: 'warning' }).then(async () => {
+    try {
+      const res = await deleteUser(row.id)
+      if (res.code === 200) {
+        ElMessage.success('删除成功')
+        fetchData()
+      }
+    } catch (e) {
+      ElMessage.error('删除失败')
+    }
   }).catch(() => {})
 }
+
+onMounted(() => fetchData())
 </script>
 
 <style scoped>
