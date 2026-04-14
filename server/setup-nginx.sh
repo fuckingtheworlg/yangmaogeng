@@ -48,7 +48,7 @@ server {
         try_files $uri $uri/ /index.html;
     }
 
-    # 后端 API 反向代理
+    # 后端 API 反向代理（禁用缓存）
     location /api/ {
         proxy_pass http://127.0.0.1:3000;
         proxy_set_header Host $host;
@@ -56,6 +56,8 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_read_timeout 120s;
+        add_header Cache-Control "no-store, no-cache, must-revalidate";
+        add_header Pragma "no-cache";
     }
 
     # 上传文件静态访问
