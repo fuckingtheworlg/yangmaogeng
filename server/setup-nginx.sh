@@ -7,6 +7,8 @@ set -e
 echo "安装 Nginx..."
 if command -v dnf &> /dev/null; then
     dnf install -y nginx
+elif command -v yum &> /dev/null; then
+    yum install -y nginx
 elif command -v apt &> /dev/null; then
     apt install -y nginx
 fi
@@ -41,6 +43,6 @@ systemctl restart nginx
 
 echo ""
 echo "Nginx 配置完成！"
-echo "现在可以通过 http://47.114.89.50/api/ships 访问 API"
+echo "API 访问地址: http://$(hostname -I | awk '{print $1}')/api/ships"
 echo ""
-echo "[提示] 域名备案完成后，修改 server_name 为你的域名"
+echo "[提示] 域名备案完成后，修改 /etc/nginx/conf.d/yaomaogeng.conf 中的 server_name"
