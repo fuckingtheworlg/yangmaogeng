@@ -45,6 +45,22 @@ Page({
       return
     }
 
+    const commissions = wx.getStorageSync('commissions') || []
+    const now = new Date()
+    const timeStr = `${now.getMonth() + 1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`
+    commissions.unshift({
+      id: Date.now(),
+      type: 'buy',
+      contact_name: form.contact_name,
+      gender: form.gender,
+      phone: form.phone,
+      deadweight: form.deadweight || '',
+      budget: form.budget || '',
+      create_time: timeStr,
+      status: 0
+    })
+    wx.setStorageSync('commissions', commissions)
+
     wx.showToast({ title: '委托提交成功', icon: 'success' })
     setTimeout(() => { wx.navigateBack() }, 1500)
   }

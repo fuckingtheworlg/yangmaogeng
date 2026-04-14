@@ -2,13 +2,17 @@
   <!-- 顶部用户区 -->
   <view class="user-header">
     <view class="user-bg"></view>
-    <view class="user-card">
+    <view class="user-card" bindtap="onLogin">
       <view class="avatar-wrap">
         <image class="avatar" src="{{userInfo.avatarUrl || '/images/avatar-default.png'}}" mode="aspectFill" />
       </view>
       <view class="user-info">
-        <text class="username">{{userInfo.nickName || '点击登录'}}</text>
-        <text class="user-desc">欢迎使用羊毛梗船舶服务</text>
+        <text class="username">{{isLogin ? userInfo.nickName : '点击登录'}}</text>
+        <text class="user-desc">{{isLogin ? '欢迎使用羊毛梗船舶服务' : '登录后可使用收藏和委托功能'}}</text>
+      </view>
+      <!-- 退出按钮 -->
+      <view class="logout-btn" wx:if="{{isLogin}}" catchtap="onLogout">
+        <text class="logout-text">退出</text>
       </view>
     </view>
   </view>
@@ -30,19 +34,23 @@
 
   <!-- 收藏列表 -->
   <view class="list-section" wx:if="{{currentTab === 0}}">
-    <view class="list-card" wx:for="{{favorites}}" wx:key="id" bindtap="goDetail" data-id="{{item.ship_id}}" style="animation-delay: {{index * 0.06}}s">
-      <view class="list-card-left">
+    <view class="list-card" wx:for="{{favorites}}" wx:key="id" style="animation-delay: {{index * 0.06}}s">
+      <view class="list-card-left" bindtap="goDetail" data-id="{{item.ship_id}}">
         <text class="list-no">{{item.ship_no}}</text>
-        <text class="list-tonnage">{{item.deadweight}} 吨</text>
+        <view class="list-meta">
+          <text class="list-tonnage">{{item.deadweight}} 吨</text>
+          <text class="list-type">{{item.ship_type}}</text>
+        </view>
       </view>
       <view class="list-card-right">
         <text class="list-price">¥{{item.price}}<text class="price-unit-sm">万</text></text>
-        <view class="icon icon-right"></view>
+        <view class="unfav-btn" catchtap="removeFavorite" data-id="{{item.ship_id}}">取消</view>
       </view>
     </view>
     <view class="empty-state" wx:if="{{favorites.length === 0}}">
       <image class="empty-img" src="/images/empty-state.png" mode="aspectFit" />
       <text class="empty-text">暂无收藏船舶</text>
+      <text class="empty-hint" wx:if="{{!isLogin}}">登录后可在详情页收藏船舶</text>
     </view>
   </view>
 
@@ -55,9 +63,11 @@
             {{item.type === 'sell' ? '出售' : '求购'}}
           </text>
         </view>
-        <text class="list-no">NO.{{item.id}}</text>
+        <text class="list-no">{{item.contact_name}} {{item.gender || ''}}</text>
+        <text class="list-tonnage" wx:if="{{item.deadweight}}">{{item.deadweight}} 吨</text>
       </view>
       <view class="list-card-right">
+        <text class="commission-time">{{item.create_time}}</text>
         <text class="commission-status {{item.status === 1 ? 'status-done' : 'status-pending'}}">
           {{item.status === 1 ? '已处理' : '待处理'}}
         </text>
@@ -66,6 +76,7 @@
     <view class="empty-state" wx:if="{{commissions.length === 0}}">
       <image class="empty-img" src="/images/empty-state.png" mode="aspectFit" />
       <text class="empty-text">暂无委托记录</text>
+      <text class="empty-hint">可在委托页面提交出售或求购需求</text>
     </view>
   </view>
 </view>
