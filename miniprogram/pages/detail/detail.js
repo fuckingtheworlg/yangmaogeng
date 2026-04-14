@@ -22,21 +22,28 @@ Page({
     this.checkFavorite(id)
   },
 
-  formatImages(ship) {
+  formatShip(ship) {
     const serverUrl = app.globalData.serverUrl
     if (ship.images && ship.images.length > 0) {
       ship.images = ship.images.map(img => {
         if (img && img.startsWith('/uploads')) return serverUrl + img
         return img
       })
+    } else {
+      ship.images = []
     }
+    if (ship.price) ship.price = parseFloat(ship.price)
+    if (ship.total_length) ship.total_length = parseFloat(ship.total_length)
+    if (ship.width) ship.width = parseFloat(ship.width)
+    if (ship.depth) ship.depth = parseFloat(ship.depth)
+    ship.ship_no = ship.ship_no || ''
     return ship
   },
 
   fetchShipDetail(id) {
     get(`/ships/${id}`).then(res => {
       if (res.code === 200 && res.data) {
-        this.setShipData(this.formatImages(res.data))
+        this.setShipData(this.formatShip(res.data))
       } else {
         this.loadMockShip(id)
       }

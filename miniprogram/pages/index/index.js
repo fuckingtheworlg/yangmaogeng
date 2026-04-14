@@ -36,17 +36,22 @@ Page({
     this.fetchShips().then(() => wx.stopPullDownRefresh())
   },
 
-  formatImages(ships) {
+  formatShip(ship) {
     const serverUrl = app.globalData.serverUrl
-    return ships.map(ship => {
-      if (ship.images && ship.images.length > 0) {
-        ship.images = ship.images.map(img => {
-          if (img && img.startsWith('/uploads')) return serverUrl + img
-          return img
-        })
-      }
-      return ship
-    })
+    if (ship.images && ship.images.length > 0) {
+      ship.images = ship.images.map(img => {
+        if (img && img.startsWith('/uploads')) return serverUrl + img
+        return img
+      })
+    } else {
+      ship.images = []
+    }
+    if (ship.price) ship.price = parseFloat(ship.price)
+    if (ship.total_length) ship.total_length = parseFloat(ship.total_length)
+    if (ship.width) ship.width = parseFloat(ship.width)
+    if (ship.depth) ship.depth = parseFloat(ship.depth)
+    ship.ship_no = ship.ship_no || ''
+    return ship
   },
 
   fetchShips() {
@@ -63,7 +68,7 @@ Page({
     const query = Object.keys(params).map(k => `${k}=${encodeURIComponent(params[k])}`).join('&')
     return get(`/ships?${query}`).then(res => {
       if (res.code === 200 && res.data && res.data.list) {
-        const list = this.formatImages(res.data.list)
+        const list = res.data.list.map(s => this.formatShip(s))
         this.setData({ shipList: list, loading: false })
       } else {
         this.setData({ shipList: mockShips, loading: false })

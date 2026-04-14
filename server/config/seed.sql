@@ -1,12 +1,18 @@
 USE yaomaogeng;
 
-SET FOREIGN_KEY_CHECKS = 0;
-TRUNCATE TABLE transactions;
-TRUNCATE TABLE favorites;
-TRUNCATE TABLE commissions;
-TRUNCATE TABLE ships;
-SET FOREIGN_KEY_CHECKS = 1;
+-- 先删除有外键依赖的表数据
+DELETE FROM transactions;
+DELETE FROM favorites;
+DELETE FROM commissions;
+DELETE FROM ships;
 
+-- 重置自增 ID
+ALTER TABLE transactions AUTO_INCREMENT = 1;
+ALTER TABLE favorites AUTO_INCREMENT = 1;
+ALTER TABLE commissions AUTO_INCREMENT = 1;
+ALTER TABLE ships AUTO_INCREMENT = 1;
+
+-- 插入船舶测试数据（10条）
 INSERT INTO ships (ship_no, total_length, width, depth, ship_type, ship_condition, deadweight, gross_tonnage, build_date, build_province, port_registry, engine_brand, engine_power, water_type, price, images, certificates, contact_name, contact_phone, status) VALUES
 ('YMG-2024-001', 88.50, 13.80, 6.20, '散货船', '优秀', 5000, 1580, '2024-03', '江苏南京', '南京', '潍柴', 1200, '内河', 680, '[]', '[]', '张经理', '13912345678', 1),
 ('YMG-2024-002', 105.00, 16.20, 7.50, '散货船', '良好', 8000, 2450, '2023-08', '浙江舟山', '舟山', '潍柴', 1800, '近海', 1280, '[]', '[]', '李经理', '13823456789', 1),
@@ -19,7 +25,12 @@ INSERT INTO ships (ship_no, total_length, width, depth, ship_type, ship_conditio
 ('YMG-2024-009', 145.00, 20.00, 10.50, '集装箱船', '优秀', 15000, 4800, '2025-03', '大连', '大连', 'MAN', 3500, '近海', 4200, '[]', '[]', '吴经理', '13190123456', 1),
 ('YMG-2024-010', 78.00, 12.50, 5.80, '散货船', '一般', 4000, 1250, '2019-12', '湖南岳阳', '岳阳', '潍柴', 950, '内河', 450, '[]', '[]', '郑经理', '13601234567', 1);
 
+-- 插入委托测试数据（3条）
 INSERT INTO commissions (user_id, type, contact_name, gender, phone, total_length, width, depth, deadweight, gross_tonnage, build_date, build_province, water_type, ship_type, engine_brand, engine_power, budget, remark, status) VALUES
 (NULL, 'sell', '钱先生', '先生', '15912345678', 95.00, 14.00, 6.50, 5500, 1700, '2022-06', '江苏', '内河', '散货船', '潍柴', 1300, 750, '船况良好，证书齐全，可随时交船', 0),
 (NULL, 'buy', '孔女士', '女士', '15823456789', 0, 0, 0, 3000, 0, '', '', '内河', '散货船', '', 0, 500, '需要3000吨左右内河散货船一条，预算500万以内', 0),
 (NULL, 'sell', '许先生', '先生', '15734567890', 110.00, 16.00, 7.80, 8500, 2600, '2021-03', '浙江', '近海', '散货船', '潍柴', 2000, 1100, '近海散货船，主机刚大修过', 1);
+
+-- 验证数据
+SELECT COUNT(*) AS ship_count FROM ships;
+SELECT COUNT(*) AS commission_count FROM commissions;
