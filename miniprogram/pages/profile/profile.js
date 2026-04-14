@@ -1,4 +1,6 @@
+const { get } = require('../../utils/request')
 const { mockShips } = require('../../utils/mock')
+const app = getApp()
 
 Page({
   data: {
@@ -25,21 +27,50 @@ Page({
 
   loadFavorites() {
     const favIds = wx.getStorageSync('favorites') || []
-    const favorites = favIds.map(id => {
-      const ship = mockShips.find(s => s.id === id)
-      if (ship) {
-        return {
-          id: ship.id,
-          ship_id: ship.id,
-          ship_no: ship.ship_no,
-          deadweight: ship.deadweight,
-          price: ship.price,
-          ship_type: ship.ship_type
+    if (favIds.length === 0) {
+      this.setData({ favorites: [] })
+      return
+    }
+    const serverUrl = app.globalData.serverUrl
+    const promises = favIds.map(id =>
+      get(`/ships/${id}`).then(res => {
+        if (res.code === 200 && res.data) {
+          const ship = res.data
+          let image = ''
+          if (ship.images && ship.images.length > 0) {
+            image = ship.images[0]
+            if (image && image.startsWith('/uploads')) image = serverUrl + image
+          }
+          return {
+            id: ship.id,
+            ship_id: ship.id,
+            ship_no: ship.ship_no,
+            deadweight: ship.deadweight,
+            price: ship.price,
+            ship_type: ship.ship_type,
+            image
+          }
         }
-      }
-      return null
-    }).filter(Boolean)
-    this.setData({ favorites })
+        return null
+      }).catch(() => {
+        const ship = mockShips.find(s => s.id === id)
+        if (ship) {
+          return {
+            id: ship.id,
+            ship_id: ship.id,
+            ship_no: ship.ship_no,
+            deadweight: ship.deadweight,
+            price: ship.price,
+            ship_type: ship.ship_type,
+            image: ship.images ? ship.images[0] : ''
+          }
+        }
+        return null
+      })
+    )
+    Promise.all(promises).then(results => {
+      this.setData({ favorites: results.filter(Boolean) })
+    })
   },
 
   loadCommissions() {

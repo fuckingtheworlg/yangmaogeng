@@ -1,5 +1,5 @@
+const { get } = require('../../utils/request')
 const { mockShips } = require('../../utils/mock')
-
 const app = getApp()
 
 Page({
@@ -17,13 +17,48 @@ Page({
       navTop: app.globalData.navTop
     })
     const id = parseInt(options.id)
-    const ship = mockShips.find(s => s.id === id)
-    if (ship) {
-      let conditionClass = 'normal'
-      if (ship.ship_condition === '优秀') conditionClass = 'excellent'
-      else if (ship.ship_condition === '良好') conditionClass = 'good'
-      this.setData({ ship, conditionClass })
+    this.shipId = id
+    this.fetchShipDetail(id)
+    this.checkFavorite(id)
+  },
+
+  formatImages(ship) {
+    const serverUrl = app.globalData.serverUrl
+    if (ship.images && ship.images.length > 0) {
+      ship.images = ship.images.map(img => {
+        if (img && img.startsWith('/uploads')) return serverUrl + img
+        return img
+      })
     }
+    return ship
+  },
+
+  fetchShipDetail(id) {
+    get(`/ships/${id}`).then(res => {
+      if (res.code === 200 && res.data) {
+        this.setShipData(this.formatImages(res.data))
+      } else {
+        this.loadMockShip(id)
+      }
+    }).catch(() => {
+      console.log('API 请求失败，使用本地数据')
+      this.loadMockShip(id)
+    })
+  },
+
+  loadMockShip(id) {
+    const ship = mockShips.find(s => s.id === id)
+    if (ship) this.setShipData(ship)
+  },
+
+  setShipData(ship) {
+    let conditionClass = 'normal'
+    if (ship.ship_condition === '优秀') conditionClass = 'excellent'
+    else if (ship.ship_condition === '良好') conditionClass = 'good'
+    this.setData({ ship, conditionClass })
+  },
+
+  checkFavorite(id) {
     const favList = wx.getStorageSync('favorites') || []
     this.setData({ isFavorited: favList.includes(id) })
   },
@@ -33,13 +68,14 @@ Page({
   },
 
   toggleFavorite() {
-    const { ship, isFavorited } = this.data
+    const id = this.shipId
+    const { isFavorited } = this.data
     let favList = wx.getStorageSync('favorites') || []
     if (isFavorited) {
-      favList = favList.filter(id => id !== ship.id)
+      favList = favList.filter(fid => fid !== id)
       wx.showToast({ title: '已取消收藏', icon: 'none' })
     } else {
-      favList.push(ship.id)
+      favList.push(id)
       wx.showToast({ title: '收藏成功', icon: 'success' })
     }
     wx.setStorageSync('favorites', favList)

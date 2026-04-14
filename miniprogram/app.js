@@ -1,6 +1,7 @@
 App({
   globalData: {
     baseUrl: 'http://47.114.89.50/api',
+    serverUrl: 'http://47.114.89.50',
     userInfo: null,
     token: '',
     statusBarHeight: 20,
