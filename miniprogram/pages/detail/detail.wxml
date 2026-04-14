@@ -1,14 +1,16 @@
 <view class="page">
   <!-- 顶部导航 -->
-  <view class="nav-bar">
-    <view class="nav-back" bindtap="goBack">
-      <view class="icon icon-back"></view>
+  <view class="nav-bar" style="padding-top: {{statusBarHeight}}px;">
+    <view class="nav-inner">
+      <view class="nav-back" bindtap="goBack">
+        <view class="icon icon-back"></view>
+      </view>
+      <view class="logo-box">YMG</view>
+      <text class="nav-title">船舶详情</text>
     </view>
-    <view class="logo-box">YMG</view>
-    <text class="nav-title">船舶详情</text>
   </view>
 
-  <scroll-view scroll-y class="content" enhanced show-scrollbar="{{false}}">
+  <scroll-view scroll-y class="content" enhanced show-scrollbar="{{false}}" style="padding-top: {{navTop}}px;">
     <!-- 船舶图片轮播 -->
     <swiper class="detail-swiper" indicator-dots indicator-color="rgba(255,255,255,0.4)" indicator-active-color="#fff" circular wx:if="{{ship.images.length > 0}}">
       <swiper-item wx:for="{{ship.images}}" wx:key="index">

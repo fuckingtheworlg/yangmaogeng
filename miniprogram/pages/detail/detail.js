@@ -1,13 +1,21 @@
 const { mockShips } = require('../../utils/mock')
 
+const app = getApp()
+
 Page({
   data: {
     ship: {},
     isFavorited: false,
-    conditionClass: 'normal'
+    conditionClass: 'normal',
+    statusBarHeight: 20,
+    navTop: 64
   },
 
   onLoad(options) {
+    this.setData({
+      statusBarHeight: app.globalData.statusBarHeight,
+      navTop: app.globalData.navTop
+    })
     const id = parseInt(options.id)
     const ship = mockShips.find(s => s.id === id)
     if (ship) {

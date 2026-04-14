@@ -5,6 +5,22 @@
   flex-direction: column;
 }
 
+/* Nav Bar */
+.nav-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 99;
+  background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-primary-dark) 100%);
+}
+.nav-inner {
+  display: flex;
+  align-items: center;
+  height: 88rpx;
+  padding: 0 24rpx;
+}
+
 .form-scroll {
   flex: 1;
 }

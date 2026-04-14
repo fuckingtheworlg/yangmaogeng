@@ -134,13 +134,15 @@ view, text, scroll-view {
   letter-spacing: 1rpx;
 }
 
-/* Nav Bar (Sub pages) */
+/* Nav Bar (Sub pages) — padding-top set dynamically via JS statusBarHeight */
 .nav-bar {
   background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-primary-dark) 100%);
-  padding: 20rpx 30rpx;
+}
+.nav-inner {
   display: flex;
   align-items: center;
-  padding-top: calc(20rpx + env(safe-area-inset-top));
+  height: 88rpx;
+  padding: 0 24rpx;
 }
 .nav-back {
   width: 56rpx;

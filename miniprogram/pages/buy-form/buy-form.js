@@ -1,5 +1,9 @@
+const app = getApp()
+
 Page({
   data: {
+    statusBarHeight: 20,
+    navTop: 64,
     form: {
       contact_name: '',
       gender: '先生',
@@ -12,6 +16,13 @@ Page({
       budget: '',
       remark: ''
     }
+  },
+
+  onLoad() {
+    this.setData({
+      statusBarHeight: app.globalData.statusBarHeight,
+      navTop: app.globalData.navTop
+    })
   },
 
   goBack() {
