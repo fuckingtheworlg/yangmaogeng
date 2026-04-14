@@ -1,150 +1,217 @@
 .page {
-  background-color: #fff;
+  background: var(--color-bg);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
-.nav-bar {
-  background-color: #CC0000;
-  padding: 20rpx 30rpx;
-  display: flex;
-  align-items: center;
-  padding-top: calc(20rpx + env(safe-area-inset-top));
-}
-
-.nav-back {
-  width: 56rpx;
-  height: 56rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 10rpx;
-}
-
-.arrow {
-  color: #fff;
-  font-size: 48rpx;
-  font-weight: bold;
-}
-
-.logo-box {
-  width: 50rpx;
-  height: 50rpx;
-  background-color: #fff;
-  color: #CC0000;
-  font-size: 20rpx;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 6rpx;
-  margin-right: 12rpx;
-  flex-shrink: 0;
-}
-
-.nav-title {
-  color: #fff;
-  font-size: 28rpx;
-  font-weight: bold;
-}
-
 .content {
   flex: 1;
-  padding-bottom: 120rpx;
 }
 
-.section {
-  padding: 24rpx 30rpx;
-  border-bottom: 1rpx solid #f0f0f0;
+/* Image Swiper */
+.detail-swiper {
+  width: 100%;
+  height: 420rpx;
+}
+.detail-img {
+  width: 100%;
+  height: 100%;
+  background: var(--color-border);
+}
+.detail-img-placeholder {
+  width: 100%;
+  height: 420rpx;
+  background: var(--color-border);
 }
 
-.info-row {
+/* Price Card */
+.price-card {
+  background: var(--color-card);
+  margin: -20rpx 24rpx 0;
+  padding: 28rpx 30rpx;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-float);
+  position: relative;
+  z-index: 2;
+}
+.price-row {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 16rpx;
+}
+.detail-price {
+  font-size: 48rpx;
+  font-weight: 800;
+  color: var(--color-primary);
+  letter-spacing: -2rpx;
+}
+.detail-price-unit {
+  font-size: 26rpx;
+  color: var(--color-primary);
+  margin-left: 6rpx;
+  font-weight: 500;
+}
+.ship-condition-badge {
+  margin-left: auto;
+  padding: 8rpx 20rpx;
+  border-radius: var(--radius-full);
+  font-size: 22rpx;
+  font-weight: 600;
+}
+.tag-good { background: #EBF5FF; color: var(--color-info); }
+.tag-excellent { background: #E8F9F0; color: var(--color-success); }
+.tag-normal { background: #FFF5E8; color: var(--color-warning); }
+
+.no-row {
   display: flex;
   align-items: center;
 }
-
-.label {
-  color: #666;
-  font-size: 26rpx;
+.ship-no-label {
+  font-size: 24rpx;
+  color: var(--color-text-hint);
+  margin-right: 12rpx;
+}
+.ship-no-value {
+  font-size: 24rpx;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  letter-spacing: 1rpx;
 }
 
-.value {
-  color: #333;
-  font-size: 26rpx;
+/* Section Card */
+.section-card {
+  background: var(--color-card);
+  margin: 20rpx 24rpx 0;
+  padding: 28rpx 30rpx;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
+.section-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24rpx;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--color-text);
+}
+.section-title-bar {
+  width: 6rpx;
+  height: 30rpx;
+  background: var(--color-primary);
+  border-radius: 3rpx;
+  margin-right: 14rpx;
 }
 
-.text-bold {
-  font-weight: bold;
-  text-decoration: underline;
-}
-
-.params-grid {
+/* Param Grid */
+.param-grid {
   display: flex;
   flex-wrap: wrap;
-  margin-bottom: 12rpx;
 }
-
-.param-item {
-  margin-right: 40rpx;
-  margin-bottom: 8rpx;
-}
-
-.price-section {
-  display: flex;
-  align-items: center;
-}
-
-.price-value {
-  color: #CC0000;
-  font-size: 36rpx;
-  font-weight: bold;
-}
-
-.ship-images {
+.param-cell {
+  width: 33.33%;
+  padding: 16rpx 0;
   display: flex;
   flex-direction: column;
-  gap: 16rpx;
+  align-items: center;
+}
+.param-label {
+  font-size: 22rpx;
+  color: var(--color-text-hint);
+  margin-bottom: 8rpx;
+}
+.param-value {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--color-text);
+}
+.param-unit {
+  font-size: 22rpx;
+  font-weight: 400;
+  color: var(--color-text-secondary);
+  margin-left: 2rpx;
 }
 
-.ship-image {
-  width: 100%;
-  height: 400rpx;
-  border-radius: 12rpx;
-  background-color: #f0f0f0;
+/* Info List */
+.info-list {
+  border-top: 1rpx solid var(--color-border);
+}
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 22rpx 0;
+  border-bottom: 1rpx solid var(--color-border);
+}
+.info-item.no-border {
+  border-bottom: none;
+}
+.info-label {
+  font-size: 26rpx;
+  color: var(--color-text-hint);
+}
+.info-value {
+  font-size: 26rpx;
+  color: var(--color-text);
+  font-weight: 500;
+}
+.info-value.highlight {
+  color: var(--color-primary);
+  font-weight: 700;
 }
 
+/* Bottom Bar */
 .bottom-bar {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 100rpx;
-  background-color: #fff;
+  background: var(--color-card);
   display: flex;
   align-items: center;
-  border-top: 1rpx solid #eee;
-  padding: 0 30rpx;
+  padding: 16rpx 24rpx;
+  box-shadow: 0 -4rpx 20rpx rgba(0,0,0,0.06);
   z-index: 100;
 }
-
+.action-left {
+  margin-right: 24rpx;
+}
 .fav-btn {
-  padding: 16rpx 40rpx;
-  border: 1rpx solid #ddd;
-  border-radius: 8rpx;
-  font-size: 28rpx;
-  color: #666;
-  margin-right: 30rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8rpx 20rpx;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s;
+}
+.fav-btn:active {
+  background: var(--color-bg);
+}
+.fav-label {
+  font-size: 20rpx;
+  color: var(--color-text-hint);
+  margin-top: 4rpx;
+}
+.fav-btn.active .fav-label {
+  color: var(--color-primary);
 }
 
-.fav-btn.active {
-  border-color: #CC0000;
-  color: #CC0000;
-  background-color: #fff5f5;
-}
-
-.contact-info {
+.contact-btn {
   flex: 1;
-  font-size: 28rpx;
-  color: #333;
+  background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary));
+  border-radius: var(--radius-full);
+  padding: 24rpx 0;
+  text-align: center;
+  box-shadow: 0 6rpx 20rpx rgba(204,0,0,0.3);
+  transition: all 0.2s;
+}
+.contact-btn:active {
+  transform: scale(0.97);
+  opacity: 0.9;
+}
+.contact-btn-text {
+  color: #fff;
+  font-size: 30rpx;
+  font-weight: 700;
+  letter-spacing: 4rpx;
 }

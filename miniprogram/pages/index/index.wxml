@@ -1,56 +1,100 @@
 <view class="page">
   <!-- 顶部导航 -->
   <view class="header">
-    <view class="logo-box">YMG</view>
-    <text class="header-title">羊毛梗船舶服务中心信息发布平台</text>
-  </view>
-
-  <!-- 轮播图 -->
-  <swiper class="banner-swiper" indicator-dots autoplay circular interval="3000">
-    <swiper-item wx:for="{{banners}}" wx:key="id">
-      <image class="banner-img" src="{{item.image}}" mode="aspectFill" />
-    </swiper-item>
-  </swiper>
-
-  <!-- 吨位筛选标签 -->
-  <view class="filter-bar">
-    <view
-      class="filter-tag {{currentFilter === index ? 'active' : ''}}"
-      wx:for="{{filters}}"
-      wx:key="index"
-      bindtap="onFilterTap"
-      data-index="{{index}}"
-    >
-      {{item.label}}
+    <view class="header-brand">
+      <view class="logo-box">YMG</view>
+      <view class="header-text">
+        <text class="header-title">羊毛梗船舶服务中心</text>
+        <text class="header-sub">信息发布平台</text>
+      </view>
     </view>
   </view>
 
   <!-- 搜索栏 -->
-  <view class="search-bar">
-    <input
-      class="search-input"
-      placeholder="搜索船舶编号/船型..."
-      value="{{searchKey}}"
-      bindinput="onSearchInput"
-      confirm-type="search"
-      bindconfirm="onSearch"
-    />
-    <view class="search-btn" bindtap="onSearch">搜索</view>
+  <view class="search-section">
+    <view class="search-bar">
+      <view class="icon icon-search search-icon"></view>
+      <input
+        class="search-input"
+        placeholder="搜索船舶编号 / 船型 / 省份"
+        placeholder-style="color: #B0B0C0"
+        value="{{searchKey}}"
+        bindinput="onSearchInput"
+        confirm-type="search"
+        bindconfirm="onSearch"
+      />
+      <view class="search-btn" bindtap="onSearch">搜索</view>
+    </view>
+  </view>
+
+  <!-- 轮播图 -->
+  <swiper class="banner-swiper" indicator-dots indicator-color="rgba(255,255,255,0.4)" indicator-active-color="#fff" autoplay circular interval="3500">
+    <swiper-item wx:for="{{banners}}" wx:key="id">
+      <view class="banner-item">
+        <image class="banner-img" src="{{item.image}}" mode="aspectFill" />
+        <view class="banner-overlay">
+          <text class="banner-text">{{item.title}}</text>
+        </view>
+      </view>
+    </swiper-item>
+  </swiper>
+
+  <!-- 吨位筛选标签 -->
+  <view class="filter-section">
+    <scroll-view scroll-x class="filter-scroll" enhanced show-scrollbar="{{false}}">
+      <view class="filter-bar">
+        <view
+          class="filter-tag {{currentFilter === index ? 'active' : ''}}"
+          wx:for="{{filters}}"
+          wx:key="index"
+          bindtap="onFilterTap"
+          data-index="{{index}}"
+        >
+          {{item.label}}
+        </view>
+      </view>
+    </scroll-view>
   </view>
 
   <!-- 船舶卡片列表 -->
   <view class="ship-grid">
-    <view class="ship-card" wx:for="{{shipList}}" wx:key="id" bindtap="goDetail" data-id="{{item.id}}">
-      <image class="ship-img" src="{{item.images[0] || '/images/ship-placeholder.png'}}" mode="aspectFill" />
+    <view
+      class="ship-card"
+      wx:for="{{shipList}}"
+      wx:key="id"
+      bindtap="goDetail"
+      data-id="{{item.id}}"
+      style="animation-delay: {{index * 0.06}}s"
+    >
+      <view class="ship-img-wrap">
+        <image class="ship-img" src="{{item.images[0] || '/images/ship-placeholder.png'}}" mode="aspectFill" />
+        <view class="ship-type-tag">{{item.ship_type}}</view>
+      </view>
       <view class="ship-info">
-        <text class="ship-tonnage">{{item.deadweight}}吨</text>
-        <text class="ship-price">{{item.price}}万元</text>
+        <view class="ship-main">
+          <text class="ship-tonnage">{{item.deadweight}}<text class="tonnage-unit">吨</text></text>
+          <text class="ship-condition tag tag-green" wx:if="{{item.ship_condition === '优秀'}}">{{item.ship_condition}}</text>
+          <text class="ship-condition tag tag-blue" wx:elif="{{item.ship_condition === '良好'}}">{{item.ship_condition}}</text>
+          <text class="ship-condition tag tag-orange" wx:else>{{item.ship_condition}}</text>
+        </view>
+        <view class="ship-meta">
+          <text class="ship-spec">{{item.total_length}}m × {{item.width}}m</text>
+          <text class="ship-province">{{item.build_province}}</text>
+        </view>
+        <view class="ship-bottom">
+          <text class="ship-price">¥{{item.price}}<text class="price-unit">万</text></text>
+          <text class="ship-no">NO.{{item.ship_no.slice(-4)}}</text>
+        </view>
       </view>
     </view>
   </view>
 
   <!-- 空状态 -->
   <view class="empty-state" wx:if="{{shipList.length === 0}}">
+    <image class="empty-img" src="/images/empty-state.png" mode="aspectFit" />
     <text class="empty-text">暂无船舶信息</text>
   </view>
+
+  <!-- 底部安全间距 -->
+  <view style="height: 20rpx;"></view>
 </view>

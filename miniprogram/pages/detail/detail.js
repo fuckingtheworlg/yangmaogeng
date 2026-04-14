@@ -3,14 +3,18 @@ const { mockShips } = require('../../utils/mock')
 Page({
   data: {
     ship: {},
-    isFavorited: false
+    isFavorited: false,
+    conditionClass: 'normal'
   },
 
   onLoad(options) {
     const id = parseInt(options.id)
     const ship = mockShips.find(s => s.id === id)
     if (ship) {
-      this.setData({ ship })
+      let conditionClass = 'normal'
+      if (ship.ship_condition === '优秀') conditionClass = 'excellent'
+      else if (ship.ship_condition === '良好') conditionClass = 'good'
+      this.setData({ ship, conditionClass })
     }
     const favList = wx.getStorageSync('favorites') || []
     this.setData({ isFavorited: favList.includes(id) })

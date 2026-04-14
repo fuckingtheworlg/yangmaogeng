@@ -1,24 +1,64 @@
 <view class="page">
   <!-- 顶部导航 -->
   <view class="header">
-    <view class="logo-box">YMG</view>
-    <text class="header-title">羊毛梗船舶服务中心信息发布平台</text>
+    <view class="header-brand">
+      <view class="logo-box">YMG</view>
+      <view class="header-text">
+        <text class="header-title">船舶委托</text>
+        <text class="header-sub">出售 · 求购 一站式服务</text>
+      </view>
+    </view>
   </view>
 
   <view class="content">
+    <!-- 说明文字 -->
+    <view class="intro-text">
+      <text>选择您需要的服务类型，提交委托信息后我们将第一时间为您对接</text>
+    </view>
+
     <!-- 出售入口 -->
-    <view class="card" bindtap="goSellForm">
-      <image class="card-img" src="/images/ship-placeholder.png" mode="aspectFill" />
-      <view class="card-btn">
-        <text>信息出售</text>
+    <view class="service-card sell-card" bindtap="goSellForm">
+      <view class="service-card-left">
+        <image class="service-icon" src="/images/icon-sell.png" mode="aspectFit" />
+      </view>
+      <view class="service-card-right">
+        <text class="service-title">我要出售</text>
+        <text class="service-desc">发布您的船舶出售信息，寻找合适买家</text>
+        <view class="service-action">
+          <text class="service-action-text">立即发布</text>
+          <view class="icon icon-right"></view>
+        </view>
       </view>
     </view>
 
     <!-- 购买入口 -->
-    <view class="card" bindtap="goBuyForm">
-      <image class="card-img card-img-red" src="/images/ship-placeholder.png" mode="aspectFill" />
-      <view class="card-btn">
-        <text>信息购买</text>
+    <view class="service-card buy-card" bindtap="goBuyForm">
+      <view class="service-card-left">
+        <image class="service-icon" src="/images/icon-buy.png" mode="aspectFit" />
+      </view>
+      <view class="service-card-right">
+        <text class="service-title">我要求购</text>
+        <text class="service-desc">提交求购需求，匹配优质船源</text>
+        <view class="service-action buy-action">
+          <text class="service-action-text">立即提交</text>
+          <view class="icon icon-right"></view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 服务保障 -->
+    <view class="guarantee-section">
+      <view class="guarantee-item">
+        <view class="guarantee-dot"></view>
+        <text>专业船舶评估</text>
+      </view>
+      <view class="guarantee-item">
+        <view class="guarantee-dot"></view>
+        <text>一对一客服对接</text>
+      </view>
+      <view class="guarantee-item">
+        <view class="guarantee-dot"></view>
+        <text>信息严格保密</text>
       </view>
     </view>
   </view>

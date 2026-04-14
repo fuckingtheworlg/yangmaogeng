@@ -2,75 +2,78 @@
   <!-- 顶部导航 -->
   <view class="nav-bar">
     <view class="nav-back" bindtap="goBack">
-      <text class="arrow">‹</text>
+      <view class="icon icon-back"></view>
     </view>
     <view class="logo-box">YMG</view>
-    <text class="nav-title">羊毛梗船舶服务中心信息发布平台</text>
+    <text class="nav-title">出售委托</text>
   </view>
 
-  <scroll-view scroll-y class="form-scroll">
-    <view class="form-title">出售信息填写</view>
+  <scroll-view scroll-y class="form-scroll" enhanced show-scrollbar="{{false}}">
+    <!-- 表单标题 -->
+    <view class="form-header">
+      <text class="form-title">出售信息填写</text>
+      <text class="form-subtitle">请完整填写以下信息，方便我们更好地为您服务</text>
+    </view>
 
-    <view class="form-section">
-      <!-- 称呼 -->
+    <!-- 联系信息 -->
+    <view class="form-card">
+      <view class="card-title">联系信息</view>
       <view class="form-row">
-        <text class="form-label">你的称呼</text>
-        <input class="form-input" placeholder="请输入称呼" value="{{form.contact_name}}" bindinput="onInput" data-field="contact_name" />
-        <view class="gender-group">
-          <view class="gender-item {{form.gender === '先生' ? 'active' : ''}}" bindtap="setGender" data-val="先生">先生</view>
-          <view class="gender-item {{form.gender === '女士' ? 'active' : ''}}" bindtap="setGender" data-val="女士">女士</view>
+        <text class="form-label">称呼</text>
+        <view class="form-right">
+          <input class="form-input" placeholder="请输入称呼" value="{{form.contact_name}}" bindinput="onInput" data-field="contact_name" />
+          <view class="gender-group">
+            <view class="gender-item {{form.gender === '先生' ? 'active' : ''}}" bindtap="setGender" data-val="先生">先生</view>
+            <view class="gender-item {{form.gender === '女士' ? 'active' : ''}}" bindtap="setGender" data-val="女士">女士</view>
+          </view>
         </view>
       </view>
-
-      <!-- 联系电话 -->
-      <view class="form-row">
-        <text class="form-label">联系电话</text>
-        <input class="form-input" placeholder="请输入电话" type="number" value="{{form.phone}}" bindinput="onInput" data-field="phone" />
+      <view class="form-row no-border">
+        <text class="form-label">电话</text>
+        <input class="form-input" placeholder="请输入联系电话" type="number" value="{{form.phone}}" bindinput="onInput" data-field="phone" />
       </view>
+    </view>
 
-      <!-- 尺寸 -->
-      <view class="form-row multi">
-        <view class="form-item">
-          <text class="form-label">总长</text>
-          <input class="form-input-sm" placeholder="米" type="digit" value="{{form.total_length}}" bindinput="onInput" data-field="total_length" />
+    <!-- 船舶参数 -->
+    <view class="form-card">
+      <view class="card-title">船舶参数</view>
+      <view class="form-row-grid">
+        <view class="grid-item">
+          <text class="grid-label">总长（米）</text>
+          <input class="grid-input" placeholder="0.0" type="digit" value="{{form.total_length}}" bindinput="onInput" data-field="total_length" />
         </view>
-        <view class="form-item">
-          <text class="form-label">型宽</text>
-          <input class="form-input-sm" placeholder="米" type="digit" value="{{form.width}}" bindinput="onInput" data-field="width" />
+        <view class="grid-item">
+          <text class="grid-label">型宽（米）</text>
+          <input class="grid-input" placeholder="0.0" type="digit" value="{{form.width}}" bindinput="onInput" data-field="width" />
         </view>
-        <view class="form-item">
-          <text class="form-label">型深</text>
-          <input class="form-input-sm" placeholder="米" type="digit" value="{{form.depth}}" bindinput="onInput" data-field="depth" />
-        </view>
-      </view>
-
-      <!-- 吨位 -->
-      <view class="form-row multi">
-        <view class="form-item">
-          <text class="form-label">总吨</text>
-          <input class="form-input-sm" placeholder="吨" type="number" value="{{form.gross_tonnage}}" bindinput="onInput" data-field="gross_tonnage" />
-        </view>
-        <view class="form-item">
-          <text class="form-label">载重吨</text>
-          <input class="form-input-sm" placeholder="吨" type="number" value="{{form.deadweight}}" bindinput="onInput" data-field="deadweight" />
+        <view class="grid-item">
+          <text class="grid-label">型深（米）</text>
+          <input class="grid-input" placeholder="0.0" type="digit" value="{{form.depth}}" bindinput="onInput" data-field="depth" />
         </view>
       </view>
-
-      <!-- 建造时间 -->
+      <view class="form-row-grid two-col">
+        <view class="grid-item">
+          <text class="grid-label">总吨（吨）</text>
+          <input class="grid-input" placeholder="0" type="number" value="{{form.gross_tonnage}}" bindinput="onInput" data-field="gross_tonnage" />
+        </view>
+        <view class="grid-item">
+          <text class="grid-label">载重吨（吨）</text>
+          <input class="grid-input" placeholder="0" type="number" value="{{form.deadweight}}" bindinput="onInput" data-field="deadweight" />
+        </view>
+      </view>
       <view class="form-row">
         <text class="form-label">建造时间</text>
         <picker mode="date" fields="month" value="{{form.build_date}}" bindchange="onDateChange">
-          <view class="form-picker">{{form.build_date || '请选择'}}</view>
+          <view class="form-picker {{form.build_date ? 'has-value' : ''}}">
+            {{form.build_date || '请选择'}}
+            <view class="icon icon-right picker-arrow"></view>
+          </view>
         </picker>
       </view>
-
-      <!-- 建造省份 -->
       <view class="form-row">
         <text class="form-label">建造省份</text>
         <input class="form-input" placeholder="请输入" value="{{form.build_province}}" bindinput="onInput" data-field="build_province" />
       </view>
-
-      <!-- 水域类型 -->
       <view class="form-row">
         <text class="form-label">水域类型</text>
         <view class="radio-group">
@@ -78,72 +81,65 @@
           <view class="radio-item {{form.water_type === '近海' ? 'active' : ''}}" bindtap="setWaterType" data-val="近海">近海</view>
         </view>
       </view>
-
-      <!-- 船型 -->
       <view class="form-row">
         <text class="form-label">船型</text>
         <picker range="{{shipTypes}}" value="{{shipTypeIndex}}" bindchange="onShipTypeChange">
-          <view class="form-picker">{{form.ship_type || '请选择船型'}}</view>
+          <view class="form-picker {{form.ship_type ? 'has-value' : ''}}">
+            {{form.ship_type || '请选择船型'}}
+            <view class="icon icon-right picker-arrow"></view>
+          </view>
         </picker>
       </view>
-
-      <!-- 主机信息 -->
-      <view class="form-row multi">
-        <view class="form-item">
-          <text class="form-label">主机品牌</text>
-          <input class="form-input-sm" placeholder="如潍柴" value="{{form.engine_brand}}" bindinput="onInput" data-field="engine_brand" />
+      <view class="form-row-grid two-col no-border">
+        <view class="grid-item">
+          <text class="grid-label">主机品牌</text>
+          <input class="grid-input" placeholder="如潍柴" value="{{form.engine_brand}}" bindinput="onInput" data-field="engine_brand" />
         </view>
-        <view class="form-item">
-          <text class="form-label">主机功力</text>
-          <input class="form-input-sm" placeholder="KW" type="number" value="{{form.engine_power}}" bindinput="onInput" data-field="engine_power" />
+        <view class="grid-item">
+          <text class="grid-label">主机功率（KW）</text>
+          <input class="grid-input" placeholder="0" type="number" value="{{form.engine_power}}" bindinput="onInput" data-field="engine_power" />
         </view>
       </view>
     </view>
 
-    <!-- 船舶照片上传 -->
-    <view class="upload-section">
-      <text class="upload-title">船舶照片上传</text>
+    <!-- 照片上传 -->
+    <view class="form-card">
+      <view class="card-title">船舶照片</view>
+      <view class="upload-hint">上传船舶实拍照片，最多9张</view>
       <view class="upload-area">
-        <image
-          wx:for="{{shipImages}}"
-          wx:key="index"
-          class="upload-preview"
-          src="{{item}}"
-          mode="aspectFill"
-          bindlongpress="deleteShipImage"
-          data-index="{{index}}"
-        />
+        <view class="upload-item" wx:for="{{shipImages}}" wx:key="index">
+          <image class="upload-preview" src="{{item}}" mode="aspectFill" />
+          <view class="upload-delete" bindtap="deleteShipImage" data-index="{{index}}">×</view>
+        </view>
         <view class="upload-btn" bindtap="chooseShipImage" wx:if="{{shipImages.length < 9}}">
-          <text class="upload-icon">+</text>
+          <view class="icon icon-camera"></view>
+          <text class="upload-btn-text">添加照片</text>
         </view>
       </view>
     </view>
 
-    <!-- 证书照片上传 -->
-    <view class="upload-section">
-      <text class="upload-title">证书照片上传</text>
+    <view class="form-card">
+      <view class="card-title">证书照片</view>
+      <view class="upload-hint">上传相关证书照片，最多9张</view>
       <view class="upload-area">
-        <image
-          wx:for="{{certImages}}"
-          wx:key="index"
-          class="upload-preview"
-          src="{{item}}"
-          mode="aspectFill"
-          bindlongpress="deleteCertImage"
-          data-index="{{index}}"
-        />
+        <view class="upload-item" wx:for="{{certImages}}" wx:key="index">
+          <image class="upload-preview" src="{{item}}" mode="aspectFill" />
+          <view class="upload-delete" bindtap="deleteCertImage" data-index="{{index}}">×</view>
+        </view>
         <view class="upload-btn" bindtap="chooseCertImage" wx:if="{{certImages.length < 9}}">
-          <text class="upload-icon">+</text>
+          <view class="icon icon-camera"></view>
+          <text class="upload-btn-text">添加照片</text>
         </view>
       </view>
     </view>
 
-    <view style="height: 160rpx;"></view>
+    <view style="height: 180rpx;"></view>
   </scroll-view>
 
   <!-- 底部 -->
   <view class="bottom-bar safe-bottom">
-    <view class="submit-btn" bindtap="submitForm">委托</view>
-    <text class="contact-text">联系方式：13600000000</text>
+    <view class="submit-btn" bindtap="submitForm">
+      <text>提交委托</text>
+    </view>
   </view>
 </view>

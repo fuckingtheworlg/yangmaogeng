@@ -2,81 +2,92 @@
   <!-- 顶部导航 -->
   <view class="nav-bar">
     <view class="nav-back" bindtap="goBack">
-      <text class="arrow">‹</text>
+      <view class="icon icon-back"></view>
     </view>
     <view class="logo-box">YMG</view>
-    <text class="nav-title">羊毛梗船舶服务中心信息发布平台</text>
+    <text class="nav-title">求购委托</text>
   </view>
 
-  <scroll-view scroll-y class="form-scroll">
-    <view class="form-title">购买信息填写</view>
+  <scroll-view scroll-y class="form-scroll" enhanced show-scrollbar="{{false}}">
+    <!-- 表单标题 -->
+    <view class="form-header">
+      <text class="form-title">购买信息填写</text>
+      <text class="form-subtitle">请填写您的需求，我们将为您匹配合适船源</text>
+    </view>
 
-    <view class="form-section">
-      <!-- 称呼 -->
+    <!-- 联系信息 -->
+    <view class="form-card">
+      <view class="card-title">联系信息</view>
       <view class="form-row">
-        <text class="form-label">你的称呼</text>
-        <input class="form-input" placeholder="请输入称呼" value="{{form.contact_name}}" bindinput="onInput" data-field="contact_name" />
-        <view class="gender-group">
-          <view class="gender-item {{form.gender === '先生' ? 'active' : ''}}" bindtap="setGender" data-val="先生">先生</view>
-          <view class="gender-item {{form.gender === '女士' ? 'active' : ''}}" bindtap="setGender" data-val="女士">女士</view>
+        <text class="form-label">称呼</text>
+        <view class="form-right">
+          <input class="form-input" placeholder="请输入称呼" value="{{form.contact_name}}" bindinput="onInput" data-field="contact_name" />
+          <view class="gender-group">
+            <view class="gender-item {{form.gender === '先生' ? 'active' : ''}}" bindtap="setGender" data-val="先生">先生</view>
+            <view class="gender-item {{form.gender === '女士' ? 'active' : ''}}" bindtap="setGender" data-val="女士">女士</view>
+          </view>
         </view>
       </view>
-
-      <!-- 联系电话 -->
-      <view class="form-row">
-        <text class="form-label">联系电话</text>
-        <input class="form-input" placeholder="请输入电话" type="number" value="{{form.phone}}" bindinput="onInput" data-field="phone" />
-      </view>
-
-      <!-- 总长 -->
-      <view class="form-row">
-        <text class="form-label">总长</text>
-        <input class="form-input" placeholder="米" type="digit" value="{{form.total_length}}" bindinput="onInput" data-field="total_length" />
-      </view>
-
-      <!-- 吨位 -->
-      <view class="form-row multi">
-        <view class="form-item">
-          <text class="form-label">吨位</text>
-          <input class="form-input-sm" placeholder="吨" type="number" value="{{form.deadweight}}" bindinput="onInput" data-field="deadweight" />
-        </view>
-        <view class="form-item">
-          <text class="form-label">总吨</text>
-          <input class="form-input-sm" placeholder="吨" type="number" value="{{form.gross_tonnage}}" bindinput="onInput" data-field="gross_tonnage" />
-        </view>
-      </view>
-
-      <!-- 主机 -->
-      <view class="form-row multi">
-        <view class="form-item">
-          <text class="form-label">主机马力</text>
-          <input class="form-input-sm" placeholder="KW" type="number" value="{{form.engine_power}}" bindinput="onInput" data-field="engine_power" />
-        </view>
-        <view class="form-item">
-          <text class="form-label">主机品牌</text>
-          <input class="form-input-sm" placeholder="如潍柴" value="{{form.engine_brand}}" bindinput="onInput" data-field="engine_brand" />
-        </view>
-      </view>
-
-      <!-- 预算 -->
-      <view class="form-row">
-        <text class="form-label">预算</text>
-        <input class="form-input" placeholder="万元" type="digit" value="{{form.budget}}" bindinput="onInput" data-field="budget" />
-      </view>
-
-      <!-- 备注 -->
-      <view class="form-row-textarea">
-        <text class="form-label">备注</text>
-        <textarea class="form-textarea" placeholder="请输入其他需求说明..." value="{{form.remark}}" bindinput="onInput" data-field="remark" />
+      <view class="form-row no-border">
+        <text class="form-label">电话</text>
+        <input class="form-input" placeholder="请输入联系电话" type="number" value="{{form.phone}}" bindinput="onInput" data-field="phone" />
       </view>
     </view>
 
-    <view style="height: 160rpx;"></view>
+    <!-- 需求参数 -->
+    <view class="form-card">
+      <view class="card-title">需求参数</view>
+      <view class="form-row">
+        <text class="form-label">总长</text>
+        <input class="form-input" placeholder="期望总长（米）" type="digit" value="{{form.total_length}}" bindinput="onInput" data-field="total_length" />
+      </view>
+      <view class="form-row-grid two-col">
+        <view class="grid-item">
+          <text class="grid-label">载重吨（吨）</text>
+          <input class="grid-input" placeholder="0" type="number" value="{{form.deadweight}}" bindinput="onInput" data-field="deadweight" />
+        </view>
+        <view class="grid-item">
+          <text class="grid-label">总吨（吨）</text>
+          <input class="grid-input" placeholder="0" type="number" value="{{form.gross_tonnage}}" bindinput="onInput" data-field="gross_tonnage" />
+        </view>
+      </view>
+      <view class="form-row-grid two-col">
+        <view class="grid-item">
+          <text class="grid-label">主机功率（KW）</text>
+          <input class="grid-input" placeholder="0" type="number" value="{{form.engine_power}}" bindinput="onInput" data-field="engine_power" />
+        </view>
+        <view class="grid-item">
+          <text class="grid-label">主机品牌</text>
+          <input class="grid-input" placeholder="如潍柴" value="{{form.engine_brand}}" bindinput="onInput" data-field="engine_brand" />
+        </view>
+      </view>
+      <view class="form-row no-border">
+        <text class="form-label">预算</text>
+        <input class="form-input" placeholder="预算金额（万元）" type="digit" value="{{form.budget}}" bindinput="onInput" data-field="budget" />
+      </view>
+    </view>
+
+    <!-- 备注 -->
+    <view class="form-card">
+      <view class="card-title">补充说明</view>
+      <textarea
+        class="form-textarea"
+        placeholder="请输入其他需求说明，如水域要求、建造年限偏好等..."
+        value="{{form.remark}}"
+        bindinput="onInput"
+        data-field="remark"
+        maxlength="500"
+        auto-height
+      />
+    </view>
+
+    <view style="height: 180rpx;"></view>
   </scroll-view>
 
   <!-- 底部 -->
   <view class="bottom-bar safe-bottom">
-    <view class="submit-btn" bindtap="submitForm">委托</view>
-    <text class="contact-text">联系方式：13600000000</text>
+    <view class="submit-btn" bindtap="submitForm">
+      <text>提交委托</text>
+    </view>
   </view>
 </view>

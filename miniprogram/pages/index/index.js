@@ -3,13 +3,13 @@ const { mockShips } = require('../../utils/mock')
 Page({
   data: {
     banners: [
-      { id: 1, image: '/images/ship-placeholder.png' },
-      { id: 2, image: '/images/ship-placeholder.png' },
-      { id: 3, image: '/images/ship-placeholder.png' }
+      { id: 1, image: '/images/ship-placeholder.png', title: '专业船舶交易 · 值得信赖' },
+      { id: 2, image: '/images/ship-placeholder.png', title: '一站式船舶委托服务' },
+      { id: 3, image: '/images/ship-placeholder.png', title: '全国各类船型 · 实时更新' }
     ],
     filters: [
       { label: '全部', min: 0, max: 999999 },
-      { label: '0-3000吨', min: 0, max: 3000 },
+      { label: '3000吨以下', min: 0, max: 3000 },
       { label: '3000-6000吨', min: 3000, max: 6000 },
       { label: '6000-12000吨', min: 6000, max: 12000 },
       { label: '12000吨以上', min: 12000, max: 999999 }

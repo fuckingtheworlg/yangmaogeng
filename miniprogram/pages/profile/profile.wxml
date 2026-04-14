@@ -1,50 +1,71 @@
 <view class="page">
-  <!-- 顶部导航 -->
-  <view class="header">
-    <view class="logo-box">YMG</view>
-    <text class="header-title">羊毛梗船舶服务中心信息发布平台</text>
-  </view>
-
-  <!-- 用户信息 -->
-  <view class="user-section">
-    <view class="avatar-box">
-      <image class="avatar" src="{{userInfo.avatarUrl || '/images/tab-profile.png'}}" />
+  <!-- 顶部用户区 -->
+  <view class="user-header">
+    <view class="user-bg"></view>
+    <view class="user-card">
+      <view class="avatar-wrap">
+        <image class="avatar" src="{{userInfo.avatarUrl || '/images/avatar-default.png'}}" mode="aspectFill" />
+      </view>
+      <view class="user-info">
+        <text class="username">{{userInfo.nickName || '点击登录'}}</text>
+        <text class="user-desc">欢迎使用羊毛梗船舶服务</text>
+      </view>
     </view>
-    <text class="username">{{userInfo.nickName || '用户姓名'}}</text>
   </view>
 
   <!-- Tab 切换 -->
-  <view class="tab-bar">
-    <view class="tab-item {{currentTab === 0 ? 'active' : ''}}" bindtap="switchTab" data-index="0">
-      我的收藏
-    </view>
-    <view class="tab-item {{currentTab === 1 ? 'active' : ''}}" bindtap="switchTab" data-index="1">
-      我的委托
+  <view class="tab-section">
+    <view class="tab-bar">
+      <view class="tab-item {{currentTab === 0 ? 'active' : ''}}" bindtap="switchTab" data-index="0">
+        <text class="tab-count">{{favorites.length}}</text>
+        <text class="tab-label">我的收藏</text>
+      </view>
+      <view class="tab-divider"></view>
+      <view class="tab-item {{currentTab === 1 ? 'active' : ''}}" bindtap="switchTab" data-index="1">
+        <text class="tab-count">{{commissions.length}}</text>
+        <text class="tab-label">我的委托</text>
+      </view>
     </view>
   </view>
 
   <!-- 收藏列表 -->
-  <view class="list" wx:if="{{currentTab === 0}}">
-    <view class="list-item" wx:for="{{favorites}}" wx:key="id" bindtap="goDetail" data-id="{{item.ship_id}}">
-      <text class="item-no">编号：{{item.ship_no}}</text>
-      <text class="item-tonnage">{{item.deadweight}}吨</text>
-      <text class="item-price">{{item.price}}万元</text>
+  <view class="list-section" wx:if="{{currentTab === 0}}">
+    <view class="list-card" wx:for="{{favorites}}" wx:key="id" bindtap="goDetail" data-id="{{item.ship_id}}" style="animation-delay: {{index * 0.06}}s">
+      <view class="list-card-left">
+        <text class="list-no">{{item.ship_no}}</text>
+        <text class="list-tonnage">{{item.deadweight}} 吨</text>
+      </view>
+      <view class="list-card-right">
+        <text class="list-price">¥{{item.price}}<text class="price-unit-sm">万</text></text>
+        <view class="icon icon-right"></view>
+      </view>
     </view>
-    <view class="empty" wx:if="{{favorites.length === 0}}">
-      <text class="empty-text">暂无收藏</text>
+    <view class="empty-state" wx:if="{{favorites.length === 0}}">
+      <image class="empty-img" src="/images/empty-state.png" mode="aspectFit" />
+      <text class="empty-text">暂无收藏船舶</text>
     </view>
   </view>
 
   <!-- 委托列表 -->
-  <view class="list" wx:if="{{currentTab === 1}}">
-    <view class="list-item" wx:for="{{commissions}}" wx:key="id">
-      <text class="item-no">编号：{{item.ship_no || item.id}}</text>
-      <text class="item-type {{item.type === 'sell' ? 'type-sell' : 'type-buy'}}">
-        {{item.type === 'sell' ? '出售' : '求购'}}
-      </text>
+  <view class="list-section" wx:if="{{currentTab === 1}}">
+    <view class="list-card" wx:for="{{commissions}}" wx:key="id" style="animation-delay: {{index * 0.06}}s">
+      <view class="list-card-left">
+        <view class="commission-type-wrap">
+          <text class="commission-type {{item.type === 'sell' ? 'type-sell' : 'type-buy'}}">
+            {{item.type === 'sell' ? '出售' : '求购'}}
+          </text>
+        </view>
+        <text class="list-no">NO.{{item.id}}</text>
+      </view>
+      <view class="list-card-right">
+        <text class="commission-status {{item.status === 1 ? 'status-done' : 'status-pending'}}">
+          {{item.status === 1 ? '已处理' : '待处理'}}
+        </text>
+      </view>
     </view>
-    <view class="empty" wx:if="{{commissions.length === 0}}">
-      <text class="empty-text">暂无委托</text>
+    <view class="empty-state" wx:if="{{commissions.length === 0}}">
+      <image class="empty-img" src="/images/empty-state.png" mode="aspectFit" />
+      <text class="empty-text">暂无委托记录</text>
     </view>
   </view>
 </view>
