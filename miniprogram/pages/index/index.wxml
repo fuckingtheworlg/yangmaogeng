@@ -67,7 +67,7 @@
       style="animation-delay: {{index * 0.06}}s"
     >
       <view class="ship-img-wrap">
-        <image class="ship-img" src="{{item.images[0] || '/images/ship-placeholder.png'}}" mode="aspectFill" />
+        <image class="ship-img" src="{{item.images[0] || '/images/ship-placeholder.jpg'}}" mode="aspectFill" />
         <view class="ship-type-tag">{{item.ship_type}}</view>
       </view>
       <view class="ship-info">
@@ -91,7 +91,7 @@
 
   <!-- 空状态 -->
   <view class="empty-state" wx:if="{{shipList.length === 0}}">
-    <image class="empty-img" src="/images/empty-state.png" mode="aspectFit" />
+    <image class="empty-img" src="/images/empty-state.jpg" mode="aspectFit" />
     <text class="empty-text">暂无船舶信息</text>
   </view>
 

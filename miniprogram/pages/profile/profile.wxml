@@ -4,7 +4,7 @@
     <view class="user-bg"></view>
     <view class="user-card">
       <view class="avatar-wrap">
-        <image class="avatar" src="{{userInfo.avatarUrl || '/images/avatar-default.png'}}" mode="aspectFill" />
+        <image class="avatar" src="{{userInfo.avatarUrl || '/images/avatar-default.jpg'}}" mode="aspectFill" />
       </view>
       <view class="user-info">
         <text class="username">{{userInfo.nickName || '点击登录'}}</text>
@@ -41,7 +41,7 @@
       </view>
     </view>
     <view class="empty-state" wx:if="{{favorites.length === 0}}">
-      <image class="empty-img" src="/images/empty-state.png" mode="aspectFit" />
+      <image class="empty-img" src="/images/empty-state.jpg" mode="aspectFit" />
       <text class="empty-text">暂无收藏船舶</text>
     </view>
   </view>
@@ -64,7 +64,7 @@
       </view>
     </view>
     <view class="empty-state" wx:if="{{commissions.length === 0}}">
-      <image class="empty-img" src="/images/empty-state.png" mode="aspectFit" />
+      <image class="empty-img" src="/images/empty-state.jpg" mode="aspectFit" />
       <text class="empty-text">暂无委托记录</text>
     </view>
   </view>

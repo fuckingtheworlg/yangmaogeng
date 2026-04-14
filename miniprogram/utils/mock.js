@@ -16,7 +16,7 @@ const mockShips = [
     engine_power: 1500,
     water_type: '内河',
     price: 2000,
-    images: ['/images/ship-placeholder.png'],
+    images: ['/images/ship-placeholder.jpg'],
     certificates: [],
     contact_phone: '13600000000',
     status: 1
@@ -38,7 +38,7 @@ const mockShips = [
     engine_power: 1200,
     water_type: '近海',
     price: 1500,
-    images: ['/images/ship-placeholder.png'],
+    images: ['/images/ship-placeholder.jpg'],
     certificates: [],
     contact_phone: '13600000000',
     status: 1
@@ -60,7 +60,7 @@ const mockShips = [
     engine_power: 2000,
     water_type: '内河',
     price: 3500,
-    images: ['/images/ship-placeholder.png'],
+    images: ['/images/ship-placeholder.jpg'],
     certificates: [],
     contact_phone: '13600000000',
     status: 1
@@ -82,7 +82,7 @@ const mockShips = [
     engine_power: 800,
     water_type: '近海',
     price: 800,
-    images: ['/images/ship-placeholder.png'],
+    images: ['/images/ship-placeholder.jpg'],
     certificates: [],
     contact_phone: '13600000000',
     status: 1
@@ -104,7 +104,7 @@ const mockShips = [
     engine_power: 1300,
     water_type: '内河',
     price: 1200,
-    images: ['/images/ship-placeholder.png'],
+    images: ['/images/ship-placeholder.jpg'],
     certificates: [],
     contact_phone: '13600000000',
     status: 1
@@ -126,7 +126,7 @@ const mockShips = [
     engine_power: 3000,
     water_type: '近海',
     price: 5000,
-    images: ['/images/ship-placeholder.png'],
+    images: ['/images/ship-placeholder.jpg'],
     certificates: [],
     contact_phone: '13600000000',
     status: 1

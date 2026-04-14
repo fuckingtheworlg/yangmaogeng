@@ -16,7 +16,7 @@
       </swiper-item>
     </swiper>
     <view class="detail-img-placeholder" wx:else>
-      <image src="/images/ship-placeholder.png" mode="aspectFill" style="width:100%;height:100%;" />
+      <image src="/images/ship-placeholder.jpg" mode="aspectFill" style="width:100%;height:100%;" />
     </view>
 
     <!-- 价格与编号 -->

@@ -3,9 +3,9 @@ const { mockShips } = require('../../utils/mock')
 Page({
   data: {
     banners: [
-      { id: 1, image: '/images/ship-placeholder.png', title: '专业船舶交易 · 值得信赖' },
-      { id: 2, image: '/images/ship-placeholder.png', title: '一站式船舶委托服务' },
-      { id: 3, image: '/images/ship-placeholder.png', title: '全国各类船型 · 实时更新' }
+      { id: 1, image: '/images/banner-1.jpg', title: '专业船舶交易 · 值得信赖' },
+      { id: 2, image: '/images/banner-2.jpg', title: '一站式船舶委托服务' },
+      { id: 3, image: '/images/banner-3.jpg', title: '全国各类船型 · 实时更新' }
     ],
     filters: [
       { label: '全部', min: 0, max: 999999 },
