@@ -325,6 +325,22 @@
   color: var(--color-text-hint);
   margin-bottom: 16rpx;
 }
+.wx-quick-btn {
+  display: block;
+  margin: 0 auto 20rpx;
+  padding: 12rpx 32rpx;
+  font-size: 24rpx;
+  color: #07C160;
+  background: rgba(7,193,96,0.1);
+  border-radius: 100rpx;
+  line-height: 1.6;
+  border: none;
+  width: auto;
+  min-height: auto;
+}
+.wx-quick-btn::after {
+  border: none;
+}
 .nickname-input {
   flex: 1;
   height: 68rpx;

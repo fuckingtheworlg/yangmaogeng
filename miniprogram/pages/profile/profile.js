@@ -94,6 +94,13 @@ Page({
     this.setData({ showLoginModal: false })
   },
 
+  onChooseAvatar(e) {
+    const { avatarUrl } = e.detail
+    if (!avatarUrl) return
+    this.setData({ tempAvatar: avatarUrl })
+    wx.showToast({ title: '已使用微信头像', icon: 'none' })
+  },
+
   chooseAvatarManually() {
     wx.chooseMedia({
       count: 1,

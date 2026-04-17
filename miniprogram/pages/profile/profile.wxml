@@ -100,11 +100,20 @@
       </view>
       <text class="avatar-tip">{{tempAvatar ? '点击更换头像' : '点击选择头像'}}</text>
 
+      <button
+        class="wx-quick-btn"
+        open-type="chooseAvatar"
+        bind:chooseavatar="onChooseAvatar"
+      >
+        使用微信头像
+      </button>
+
       <view class="login-row">
         <text class="login-row-label">昵称</text>
         <input
           class="nickname-input"
-          placeholder="请输入昵称"
+          type="nickname"
+          placeholder="点此可使用微信昵称"
           value="{{tempNickname}}"
           bindinput="onNicknameInput"
           maxlength="20"
