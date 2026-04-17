@@ -288,56 +288,33 @@
   color: var(--color-text);
   font-weight: 500;
 }
-.login-avatar-section {
+.avatar-picker {
+  flex: 1;
+  background: transparent !important;
+  padding: 0 !important;
+  margin: 0;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  padding: 10rpx 0 16rpx;
+  justify-content: flex-end;
+  line-height: normal;
+  border: none !important;
+  font-size: 28rpx;
+  color: var(--color-text-hint);
 }
-.avatar-big {
-  width: 160rpx;
-  height: 160rpx;
+.avatar-picker::after {
+  display: none;
+}
+.avatar-preview {
+  width: 96rpx;
+  height: 96rpx;
   border-radius: 50%;
   background: var(--color-bg);
-  border: 4rpx solid var(--color-card);
-  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.12);
+  border: 2rpx solid var(--color-border);
 }
-.avatar-edit-badge {
-  margin-top: 14rpx;
-  padding: 8rpx 24rpx;
-  background: var(--color-primary-bg);
-  border-radius: 100rpx;
-}
-.avatar-edit-text {
-  font-size: 22rpx;
-  color: var(--color-primary);
-  font-weight: 500;
-}
-.avatar-quick-row {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 10rpx;
-}
-.avatar-wx-btn {
-  margin: 0;
-  padding: 10rpx 30rpx;
+.avatar-picker-hint {
   font-size: 24rpx;
-  color: var(--color-primary);
-  background: var(--color-card);
-  border: 2rpx solid var(--color-primary);
-  border-radius: 100rpx;
-  line-height: 1.6;
-}
-.avatar-wx-btn::after {
-  border: none;
-}
-.login-tip {
-  display: block;
-  font-size: 22rpx;
   color: var(--color-text-hint);
-  margin-top: 14rpx;
-  line-height: 1.6;
-  text-align: center;
+  margin-right: 16rpx;
 }
 .nickname-input {
   flex: 1;

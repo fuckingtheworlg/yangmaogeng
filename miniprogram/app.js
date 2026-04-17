@@ -15,8 +15,12 @@ App({
       this.globalData.token = token
     }
 
-    const sysInfo = wx.getSystemInfoSync()
-    this.globalData.statusBarHeight = sysInfo.statusBarHeight || 20
+    try {
+      const windowInfo = wx.getWindowInfo()
+      this.globalData.statusBarHeight = windowInfo.statusBarHeight || 20
+    } catch (e) {
+      this.globalData.statusBarHeight = 20
+    }
     this.globalData.navBarHeight = 44
     this.globalData.navTop = this.globalData.statusBarHeight + this.globalData.navBarHeight
   }
