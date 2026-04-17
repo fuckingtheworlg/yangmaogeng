@@ -96,7 +96,30 @@ Page({
 
   onChooseAvatar(e) {
     const { avatarUrl } = e.detail
+    if (!avatarUrl) {
+      wx.showToast({ title: '获取头像失败，请手动上传', icon: 'none' })
+      return
+    }
     this.setData({ tempAvatar: avatarUrl })
+  },
+
+  chooseAvatarManually() {
+    wx.chooseMedia({
+      count: 1,
+      mediaType: ['image'],
+      sourceType: ['album', 'camera'],
+      sizeType: ['compressed'],
+      success: (res) => {
+        if (res.tempFiles && res.tempFiles.length > 0) {
+          this.setData({ tempAvatar: res.tempFiles[0].tempFilePath })
+        }
+      },
+      fail: (err) => {
+        if (err.errMsg && err.errMsg.indexOf('cancel') === -1) {
+          wx.showToast({ title: '选择图片失败', icon: 'none' })
+        }
+      }
+    })
   },
 
   onNicknameInput(e) {

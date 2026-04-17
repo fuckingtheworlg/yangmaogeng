@@ -90,10 +90,21 @@
 
       <view class="login-row">
         <text class="login-row-label">头像</text>
-        <button class="avatar-picker" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
-          <image class="avatar-preview" src="{{tempAvatar || '/images/avatar-default.png'}}" mode="aspectFill" />
-          <text class="avatar-picker-hint" wx:if="{{!tempAvatar}}">点击选择头像</text>
-        </button>
+        <view class="avatar-actions">
+          <image
+            class="avatar-preview"
+            src="{{tempAvatar || '/images/avatar-default.png'}}"
+            mode="aspectFill"
+            bindtap="chooseAvatarManually"
+          />
+          <button
+            class="avatar-wx-btn"
+            open-type="chooseAvatar"
+            bind:chooseavatar="onChooseAvatar"
+          >
+            微信头像
+          </button>
+        </view>
       </view>
 
       <view class="login-row">
@@ -106,6 +117,7 @@
           bindinput="onNicknameInput"
         />
       </view>
+      <text class="login-tip">点击头像可从相册选择，或点击"微信头像"使用微信账号头像</text>
 
       <view class="login-actions">
         <view class="login-btn cancel" bindtap="closeLoginModal">取消</view>
