@@ -96,28 +96,64 @@ Page({
 
   onChooseAvatar(e) {
     const { avatarUrl } = e.detail
-    if (!avatarUrl) return
+    if (!avatarUrl) {
+      wx.showToast({ title: '获取头像失败，请手动上传', icon: 'none' })
+      return
+    }
     this.setData({ tempAvatar: avatarUrl })
-    wx.showToast({ title: '已使用微信头像', icon: 'none' })
   },
 
   chooseAvatarManually() {
-    wx.chooseMedia({
-      count: 1,
-      mediaType: ['image'],
-      sourceType: ['album', 'camera'],
-      sizeType: ['compressed'],
-      success: (res) => {
-        if (res.tempFiles && res.tempFiles.length > 0) {
-          this.setData({ tempAvatar: res.tempFiles[0].tempFilePath })
+    const useChooseImage = () => {
+      wx.chooseImage({
+        count: 1,
+        sizeType: ['compressed'],
+        sourceType: ['album', 'camera'],
+        success: (res) => {
+          const path = res.tempFilePaths && res.tempFilePaths[0]
+          if (path) {
+            this.setData({ tempAvatar: path })
+            wx.showToast({ title: '已选择头像', icon: 'success' })
+          } else {
+            wx.showToast({ title: '未获取到图片', icon: 'none' })
+          }
+        },
+        fail: (err) => {
+          console.error('chooseImage 失败', err)
+          if (err.errMsg && err.errMsg.indexOf('cancel') !== -1) return
+          wx.showModal({
+            title: '选择图片失败',
+            content: err.errMsg || '请检查相册权限或稍后重试',
+            showCancel: false
+          })
         }
-      },
-      fail: (err) => {
-        if (err.errMsg && err.errMsg.indexOf('cancel') === -1) {
-          wx.showToast({ title: '选择图片失败', icon: 'none' })
+      })
+    }
+
+    if (wx.chooseMedia) {
+      wx.chooseMedia({
+        count: 1,
+        mediaType: ['image'],
+        sourceType: ['album', 'camera'],
+        sizeType: ['compressed'],
+        success: (res) => {
+          const file = res.tempFiles && res.tempFiles[0]
+          if (file && file.tempFilePath) {
+            this.setData({ tempAvatar: file.tempFilePath })
+            wx.showToast({ title: '已选择头像', icon: 'success' })
+          } else {
+            useChooseImage()
+          }
+        },
+        fail: (err) => {
+          console.error('chooseMedia 失败，降级 chooseImage', err)
+          if (err.errMsg && err.errMsg.indexOf('cancel') !== -1) return
+          useChooseImage()
         }
-      }
-    })
+      })
+    } else {
+      useChooseImage()
+    }
   },
 
   onNicknameInput(e) {

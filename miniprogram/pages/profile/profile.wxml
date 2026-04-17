@@ -88,37 +88,38 @@
         <text class="login-modal-subtitle">请授权获取微信头像和昵称</text>
       </view>
 
-      <view class="avatar-upload" bindtap="chooseAvatarManually">
+      <view class="login-avatar-section" bindtap="chooseAvatarManually">
         <image
-          class="avatar-preview-lg"
+          class="avatar-big"
           src="{{tempAvatar || '/images/avatar-default.png'}}"
           mode="aspectFill"
         />
-        <view class="avatar-camera-badge">
-          <view class="icon icon-camera"></view>
+        <view class="avatar-edit-badge">
+          <text class="avatar-edit-text">{{tempAvatar ? '更换头像' : '点击选择头像'}}</text>
         </view>
       </view>
-      <text class="avatar-tip">{{tempAvatar ? '点击更换头像' : '点击选择头像'}}</text>
 
-      <button
-        class="wx-quick-btn"
-        open-type="chooseAvatar"
-        bind:chooseavatar="onChooseAvatar"
-      >
-        使用微信头像
-      </button>
+      <view class="avatar-quick-row">
+        <button
+          class="avatar-wx-btn"
+          open-type="chooseAvatar"
+          bind:chooseavatar="onChooseAvatar"
+        >
+          使用微信头像
+        </button>
+      </view>
 
       <view class="login-row">
         <text class="login-row-label">昵称</text>
         <input
           class="nickname-input"
           type="nickname"
-          placeholder="点此可使用微信昵称"
+          placeholder="请输入昵称"
           value="{{tempNickname}}"
           bindinput="onNicknameInput"
-          maxlength="20"
         />
       </view>
+      <text class="login-tip">点击上方头像从相册选择图片；开发者工具里可能需要使用"真机调试"才能访问微信头像</text>
 
       <view class="login-actions">
         <view class="login-btn cancel" bindtap="closeLoginModal">取消</view>

@@ -288,13 +288,13 @@
   color: var(--color-text);
   font-weight: 500;
 }
-.avatar-upload {
-  position: relative;
-  width: 160rpx;
-  height: 160rpx;
-  margin: 10rpx auto 12rpx;
+.login-avatar-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10rpx 0 16rpx;
 }
-.avatar-preview-lg {
+.avatar-big {
   width: 160rpx;
   height: 160rpx;
   border-radius: 50%;
@@ -302,44 +302,42 @@
   border: 4rpx solid var(--color-card);
   box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.12);
 }
-.avatar-camera-badge {
-  position: absolute;
-  right: -4rpx;
-  bottom: -4rpx;
-  width: 56rpx;
-  height: 56rpx;
-  border-radius: 50%;
-  background: var(--color-primary);
+.avatar-edit-badge {
+  margin-top: 14rpx;
+  padding: 8rpx 24rpx;
+  background: var(--color-primary-bg);
+  border-radius: 100rpx;
+}
+.avatar-edit-text {
+  font-size: 22rpx;
+  color: var(--color-primary);
+  font-weight: 500;
+}
+.avatar-quick-row {
   display: flex;
-  align-items: center;
   justify-content: center;
-  box-shadow: 0 4rpx 12rpx rgba(204,0,0,0.4);
+  margin-bottom: 10rpx;
 }
-.avatar-camera-badge .icon-camera {
-  color: #fff;
-}
-.avatar-tip {
-  display: block;
-  text-align: center;
+.avatar-wx-btn {
+  margin: 0;
+  padding: 10rpx 30rpx;
   font-size: 24rpx;
-  color: var(--color-text-hint);
-  margin-bottom: 16rpx;
-}
-.wx-quick-btn {
-  display: block;
-  margin: 0 auto 20rpx;
-  padding: 12rpx 32rpx;
-  font-size: 24rpx;
-  color: #07C160;
-  background: rgba(7,193,96,0.1);
+  color: var(--color-primary);
+  background: var(--color-card);
+  border: 2rpx solid var(--color-primary);
   border-radius: 100rpx;
   line-height: 1.6;
-  border: none;
-  width: auto;
-  min-height: auto;
 }
-.wx-quick-btn::after {
+.avatar-wx-btn::after {
   border: none;
+}
+.login-tip {
+  display: block;
+  font-size: 22rpx;
+  color: var(--color-text-hint);
+  margin-top: 14rpx;
+  line-height: 1.6;
+  text-align: center;
 }
 .nickname-input {
   flex: 1;
