@@ -237,8 +237,33 @@
   padding: 16rpx 24rpx;
   box-shadow: 0 -4rpx 20rpx rgba(0,0,0,0.06);
   z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+.phone-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  padding: 22rpx 24rpx;
+  border-radius: var(--radius-full);
+  border: 2rpx solid var(--color-primary);
+  color: var(--color-primary);
+  background: var(--color-card);
+  font-size: 26rpx;
+  font-weight: 600;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+.phone-btn:active {
+  background: var(--color-primary-bg);
+}
+.phone-btn-text {
+  font-size: 26rpx;
 }
 .submit-btn {
+  flex: 1;
   background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary));
   color: #fff;
   border-radius: var(--radius-full);

@@ -8,7 +8,10 @@ Page({
     isLogin: false,
     currentTab: 0,
     favorites: [],
-    commissions: []
+    commissions: [],
+    showLoginModal: false,
+    tempAvatar: '',
+    tempNickname: ''
   },
 
   onShow() {
@@ -80,22 +83,45 @@ Page({
 
   onLogin() {
     if (this.data.isLogin) return
-    wx.showModal({
-      title: '设置昵称',
-      editable: true,
-      placeholderText: '请输入您的昵称',
-      success: (res) => {
-        if (res.confirm && res.content) {
-          const userInfo = {
-            nickName: res.content,
-            avatarUrl: ''
-          }
-          wx.setStorageSync('userInfo', userInfo)
-          this.setData({ userInfo, isLogin: true })
-          wx.showToast({ title: '登录成功', icon: 'success' })
-        }
-      }
+    this.setData({
+      showLoginModal: true,
+      tempAvatar: '',
+      tempNickname: ''
     })
+  },
+
+  closeLoginModal() {
+    this.setData({ showLoginModal: false })
+  },
+
+  onChooseAvatar(e) {
+    const { avatarUrl } = e.detail
+    this.setData({ tempAvatar: avatarUrl })
+  },
+
+  onNicknameInput(e) {
+    this.setData({ tempNickname: e.detail.value })
+  },
+
+  confirmLogin() {
+    const { tempAvatar, tempNickname } = this.data
+    if (!tempNickname || !tempNickname.trim()) {
+      wx.showToast({ title: '请填写昵称', icon: 'none' })
+      return
+    }
+    const userInfo = {
+      nickName: tempNickname.trim(),
+      avatarUrl: tempAvatar || ''
+    }
+    wx.setStorageSync('userInfo', userInfo)
+    this.setData({
+      userInfo,
+      isLogin: true,
+      showLoginModal: false,
+      tempAvatar: '',
+      tempNickname: ''
+    })
+    wx.showToast({ title: '登录成功', icon: 'success' })
   },
 
   onLogout() {

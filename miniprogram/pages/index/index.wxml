@@ -16,7 +16,7 @@
       <view class="icon icon-search search-icon"></view>
       <input
         class="search-input"
-        placeholder="搜索船舶编号 / 船型 / 省份"
+        placeholder="搜索船舶编号 / 年份 / 载货吨位"
         placeholder-style="color: #B0B0C0"
         value="{{searchKey}}"
         bindinput="onSearchInput"
@@ -73,9 +73,6 @@
       <view class="ship-info">
         <view class="ship-main">
           <text class="ship-tonnage">{{item.deadweight}}<text class="tonnage-unit">吨</text></text>
-          <text class="ship-condition tag tag-green" wx:if="{{item.ship_condition === '优秀'}}">{{item.ship_condition}}</text>
-          <text class="ship-condition tag tag-blue" wx:elif="{{item.ship_condition === '良好'}}">{{item.ship_condition}}</text>
-          <text class="ship-condition tag tag-orange" wx:else>{{item.ship_condition}}</text>
         </view>
         <view class="ship-meta">
           <text class="ship-spec">{{item.total_length}}m × {{item.width}}m</text>

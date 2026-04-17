@@ -79,6 +79,35 @@
 .tag-excellent { background: #E8F9F0; color: var(--color-success); }
 .tag-normal { background: #FFF5E8; color: var(--color-warning); }
 
+.unit-price-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12rpx;
+  padding: 10rpx 16rpx;
+  background: linear-gradient(90deg, #FFF0F0, #FFF8F5);
+  border-radius: var(--radius-sm);
+}
+.unit-price-label {
+  font-size: 24rpx;
+  color: var(--color-text-hint);
+  margin-right: 12rpx;
+}
+.unit-price-value {
+  font-size: 28rpx;
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.description-box {
+  padding: 8rpx 4rpx;
+}
+.description-text {
+  font-size: 26rpx;
+  color: var(--color-text);
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
 .no-row {
   display: flex;
   align-items: center;

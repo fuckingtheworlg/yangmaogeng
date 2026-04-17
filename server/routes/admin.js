@@ -59,7 +59,7 @@ router.get('/ships', adminAuth, async (req, res) => {
 router.post('/ships', adminAuth, async (req, res) => {
   try {
     const data = req.body
-    const fields = ['ship_no', 'total_length', 'width', 'depth', 'ship_type', 'ship_condition', 'deadweight', 'gross_tonnage', 'build_date', 'build_province', 'port_registry', 'engine_brand', 'engine_power', 'water_type', 'price', 'images', 'certificates', 'contact_name', 'contact_phone', 'status']
+    const fields = ['ship_no', 'total_length', 'width', 'depth', 'ship_type', 'ship_condition', 'deadweight', 'gross_tonnage', 'build_date', 'build_province', 'port_registry', 'engine_brand', 'engine_power', 'engine_count', 'water_type', 'price', 'images', 'certificates', 'contact_name', 'contact_phone', 'description', 'status']
     const values = fields.map(f => data[f] !== undefined ? (typeof data[f] === 'object' ? JSON.stringify(data[f]) : data[f]) : null)
     const sql = `INSERT INTO ships (${fields.join(',')}) VALUES (${fields.map(() => '?').join(',')})`
     const [result] = await pool.query(sql, values)
@@ -73,7 +73,7 @@ router.put('/ships/:id', adminAuth, async (req, res) => {
   try {
     const { id } = req.params
     const data = req.body
-    const fields = ['ship_no', 'total_length', 'width', 'depth', 'ship_type', 'ship_condition', 'deadweight', 'gross_tonnage', 'build_date', 'build_province', 'port_registry', 'engine_brand', 'engine_power', 'water_type', 'price', 'images', 'certificates', 'contact_name', 'contact_phone', 'status']
+    const fields = ['ship_no', 'total_length', 'width', 'depth', 'ship_type', 'ship_condition', 'deadweight', 'gross_tonnage', 'build_date', 'build_province', 'port_registry', 'engine_brand', 'engine_power', 'engine_count', 'water_type', 'price', 'images', 'certificates', 'contact_name', 'contact_phone', 'description', 'status']
     const sets = []
     const values = []
     fields.forEach(f => {

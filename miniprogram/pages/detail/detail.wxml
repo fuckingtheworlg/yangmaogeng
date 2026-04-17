@@ -28,6 +28,10 @@
         <text class="detail-price-unit">万元</text>
         <view class="ship-condition-badge tag-{{conditionClass}}">{{ship.ship_condition}}</view>
       </view>
+      <view class="unit-price-row" wx:if="{{unitPrice}}">
+        <text class="unit-price-label">单价</text>
+        <text class="unit-price-value">¥{{unitPrice}} / 吨</text>
+      </view>
       <view class="no-row">
         <text class="ship-no-label">船舶编号</text>
         <text class="ship-no-value">{{ship.ship_no}}</text>
@@ -65,6 +69,10 @@
           <text class="param-label">船型</text>
           <text class="param-value">{{ship.ship_type}}</text>
         </view>
+        <view class="param-cell">
+          <text class="param-label">水域</text>
+          <text class="param-value">{{ship.water_type}}</text>
+        </view>
       </view>
     </view>
 
@@ -80,16 +88,12 @@
           <text class="info-value">{{ship.build_date}}</text>
         </view>
         <view class="info-item">
-          <text class="info-label">建造省份</text>
+          <text class="info-label">建造地点</text>
           <text class="info-value">{{ship.build_province}}</text>
         </view>
-        <view class="info-item">
+        <view class="info-item no-border">
           <text class="info-label">港籍</text>
           <text class="info-value">{{ship.port_registry}}</text>
-        </view>
-        <view class="info-item">
-          <text class="info-label">水域</text>
-          <text class="info-value">{{ship.water_type}}</text>
         </view>
       </view>
     </view>
@@ -105,10 +109,25 @@
           <text class="info-label">主机品牌</text>
           <text class="info-value highlight">{{ship.engine_brand}}</text>
         </view>
-        <view class="info-item no-border">
+        <view class="info-item">
           <text class="info-label">主机功率</text>
           <text class="info-value">{{ship.engine_power}} KW</text>
         </view>
+        <view class="info-item no-border">
+          <text class="info-label">主机数量</text>
+          <text class="info-value">{{ship.engine_count || 1}} 台</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 其他描述 -->
+    <view class="section-card" wx:if="{{ship.description}}">
+      <view class="section-title">
+        <view class="section-title-bar"></view>
+        <text>其他描述</text>
+      </view>
+      <view class="description-box">
+        <text class="description-text">{{ship.description}}</text>
       </view>
     </view>
 

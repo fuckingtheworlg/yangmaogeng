@@ -7,7 +7,7 @@ const { userAuth } = require('../middleware/auth')
 router.post('/', userAuth, async (req, res) => {
   try {
     const data = req.body
-    const fields = ['user_id', 'type', 'contact_name', 'gender', 'phone', 'total_length', 'width', 'depth', 'deadweight', 'gross_tonnage', 'build_date', 'build_province', 'water_type', 'ship_type', 'engine_brand', 'engine_power', 'budget', 'ship_images', 'cert_images', 'remark']
+    const fields = ['user_id', 'type', 'contact_name', 'gender', 'phone', 'total_length', 'width', 'depth', 'deadweight', 'gross_tonnage', 'build_date', 'build_province', 'water_type', 'ship_type', 'engine_brand', 'engine_power', 'engine_count', 'year_start', 'year_end', 'budget', 'ship_images', 'cert_images', 'remark']
     const values = fields.map(f => {
       if (f === 'user_id') return req.userId
       if (f === 'ship_images' || f === 'cert_images') return JSON.stringify(data[f] || [])

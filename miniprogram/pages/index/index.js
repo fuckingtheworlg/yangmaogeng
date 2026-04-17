@@ -13,8 +13,10 @@ Page({
       { label: '全部', min: 0, max: 0 },
       { label: '3000吨以下', min: 0, max: 3000 },
       { label: '3000-6000吨', min: 3000, max: 6000 },
-      { label: '6000-12000吨', min: 6000, max: 12000 },
-      { label: '12000吨以上', min: 12000, max: 0 }
+      { label: '6000-9000吨', min: 6000, max: 9000 },
+      { label: '9000-12000吨', min: 9000, max: 12000 },
+      { label: '12000-15000吨', min: 12000, max: 15000 },
+      { label: '15000吨以上', min: 15000, max: 0 }
     ],
     currentFilter: 0,
     searchKey: '',

@@ -7,6 +7,7 @@ Page({
     ship: {},
     isFavorited: false,
     conditionClass: 'normal',
+    unitPrice: '',
     statusBarHeight: 20,
     navTop: 64
   },
@@ -62,7 +63,14 @@ Page({
     let conditionClass = 'normal'
     if (ship.ship_condition === '优秀') conditionClass = 'excellent'
     else if (ship.ship_condition === '良好') conditionClass = 'good'
-    this.setData({ ship, conditionClass })
+    let unitPrice = ''
+    const price = parseFloat(ship.price) || 0
+    const dwt = parseFloat(ship.deadweight) || 0
+    if (price > 0 && dwt > 0) {
+      const unit = (price * 10000 / dwt)
+      unitPrice = unit >= 100 ? unit.toFixed(0) : unit.toFixed(1)
+    }
+    this.setData({ ship, conditionClass, unitPrice })
   },
 
   checkFavorite(id) {

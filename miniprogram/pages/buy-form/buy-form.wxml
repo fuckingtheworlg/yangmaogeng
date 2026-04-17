@@ -55,12 +55,49 @@
       </view>
       <view class="form-row-grid two-col">
         <view class="grid-item">
+          <text class="grid-label">年限（起始年份）</text>
+          <input class="grid-input" placeholder="如 2015" type="number" value="{{form.year_start}}" bindinput="onInput" data-field="year_start" />
+        </view>
+        <view class="grid-item">
+          <text class="grid-label">年限（截止年份）</text>
+          <input class="grid-input" placeholder="如 2024" type="number" value="{{form.year_end}}" bindinput="onInput" data-field="year_end" />
+        </view>
+      </view>
+      <view class="form-row">
+        <text class="form-label">建造地</text>
+        <input class="form-input" placeholder="请输入意向建造地" value="{{form.build_province}}" bindinput="onInput" data-field="build_province" />
+      </view>
+      <view class="form-row">
+        <text class="form-label">船型</text>
+        <picker range="{{shipTypes}}" value="{{shipTypeIndex}}" bindchange="onShipTypeChange">
+          <view class="form-picker {{form.ship_type ? 'has-value' : ''}}">
+            {{form.ship_type || '请选择船型'}}
+            <view class="icon icon-right picker-arrow"></view>
+          </view>
+        </picker>
+      </view>
+      <view class="form-row">
+        <text class="form-label">水域类型</text>
+        <view class="radio-group">
+          <view class="radio-item {{form.water_type === '内河' ? 'active' : ''}}" bindtap="setWaterType" data-val="内河">内河</view>
+          <view class="radio-item {{form.water_type === '沿海' ? 'active' : ''}}" bindtap="setWaterType" data-val="沿海">沿海</view>
+          <view class="radio-item {{form.water_type === '远洋' ? 'active' : ''}}" bindtap="setWaterType" data-val="远洋">远洋</view>
+        </view>
+      </view>
+      <view class="form-row-grid two-col">
+        <view class="grid-item">
           <text class="grid-label">主机功率（KW）</text>
           <input class="grid-input" placeholder="0" type="number" value="{{form.engine_power}}" bindinput="onInput" data-field="engine_power" />
         </view>
         <view class="grid-item">
           <text class="grid-label">主机品牌</text>
           <input class="grid-input" placeholder="如潍柴" value="{{form.engine_brand}}" bindinput="onInput" data-field="engine_brand" />
+        </view>
+      </view>
+      <view class="form-row-grid">
+        <view class="grid-item">
+          <text class="grid-label">主机个数（台）</text>
+          <input class="grid-input" placeholder="1" type="number" value="{{form.engine_count}}" bindinput="onInput" data-field="engine_count" />
         </view>
       </view>
       <view class="form-row no-border">
@@ -74,7 +111,7 @@
       <view class="card-title">补充说明</view>
       <textarea
         class="form-textarea"
-        placeholder="请输入其他需求说明，如水域要求、建造年限偏好等..."
+        placeholder="请输入其他需求说明..."
         value="{{form.remark}}"
         bindinput="onInput"
         data-field="remark"
@@ -88,6 +125,10 @@
 
   <!-- 底部 -->
   <view class="bottom-bar safe-bottom">
+    <view class="phone-btn" bindtap="callService">
+      <view class="icon icon-phone"></view>
+      <text class="phone-btn-text">委托联系电话</text>
+    </view>
     <view class="submit-btn" bindtap="submitForm">
       <text>提交委托</text>
     </view>

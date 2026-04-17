@@ -18,10 +18,12 @@ Page({
       water_type: '内河',
       ship_type: '',
       engine_brand: '',
-      engine_power: ''
+      engine_power: '',
+      engine_count: ''
     },
-    shipTypes: ['川船', '海船', '集装箱船', '散货船', '油船', '其他'],
+    shipTypes: ['干散货船', '甲板船', '集装箱船', '液货船', '客船', '其他'],
     shipTypeIndex: 0,
+    servicePhone: '400-888-0000',
     shipImages: [],
     certImages: []
   },
@@ -99,6 +101,10 @@ Page({
         }
       }
     })
+  },
+
+  callService() {
+    wx.makePhoneCall({ phoneNumber: this.data.servicePhone })
   },
 
   deleteCertImage(e) {

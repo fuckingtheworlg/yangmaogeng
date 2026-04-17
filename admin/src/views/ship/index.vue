@@ -25,7 +25,10 @@
       <el-table-column prop="engine_power" label="主机力量" width="90">
         <template #default="{ row }">{{ row.engine_power }}千瓦</template>
       </el-table-column>
-      <el-table-column prop="water_type" label="内河/近海" width="90" />
+      <el-table-column prop="engine_count" label="主机数量" width="90">
+        <template #default="{ row }">{{ row.engine_count || 1 }}台</template>
+      </el-table-column>
+      <el-table-column prop="water_type" label="水域" width="80" />
       <el-table-column prop="ship_condition" label="船况" width="70" />
       <el-table-column prop="price" label="估价" width="100">
         <template #default="{ row }">
@@ -54,11 +57,13 @@
         <div class="detail-item"><span class="dl">港籍：</span>{{ currentShip.port_registry }}</div>
         <div class="detail-item"><span class="dl">主机品牌：</span>{{ currentShip.engine_brand }}</div>
         <div class="detail-item"><span class="dl">主机力量：</span>{{ currentShip.engine_power }}千瓦</div>
+        <div class="detail-item"><span class="dl">主机数量：</span>{{ currentShip.engine_count || 1 }}台</div>
         <div class="detail-item"><span class="dl">水域：</span>{{ currentShip.water_type }}</div>
         <div class="detail-item"><span class="dl">船况：</span>{{ currentShip.ship_condition }}</div>
         <div class="detail-item"><span class="dl">估价：</span><span style="color:#CC0000;font-weight:bold">{{ formatPrice(currentShip.price) }}万元</span></div>
         <div class="detail-item"><span class="dl">联系人：</span>{{ currentShip.contact_name }}</div>
         <div class="detail-item"><span class="dl">电话：</span>{{ currentShip.contact_phone }}</div>
+        <div class="detail-item" style="grid-column: span 2"><span class="dl">其他描述：</span>{{ currentShip.description || '-' }}</div>
       </div>
     </el-dialog>
 
@@ -71,11 +76,12 @@
           <el-col :span="12">
             <el-form-item label="船型">
               <el-select v-model="shipForm.ship_type" style="width: 100%">
-                <el-option label="川船" value="川船" />
-                <el-option label="海船" value="海船" />
-                <el-option label="散货船" value="散货船" />
+                <el-option label="干散货船" value="干散货船" />
+                <el-option label="甲板船" value="甲板船" />
                 <el-option label="集装箱船" value="集装箱船" />
-                <el-option label="油船" value="油船" />
+                <el-option label="液货船" value="液货船" />
+                <el-option label="客船" value="客船" />
+                <el-option label="其他" value="其他" />
               </el-select>
             </el-form-item>
           </el-col>
@@ -91,21 +97,24 @@
         </el-row>
         <el-row :gutter="16">
           <el-col :span="12"><el-form-item label="建造时间"><el-date-picker v-model="shipForm.build_date" type="month" value-format="YYYY-MM" style="width:100%" /></el-form-item></el-col>
-          <el-col :span="12"><el-form-item label="建造省份"><el-input v-model="shipForm.build_province" /></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="建造地点"><el-input v-model="shipForm.build_province" /></el-form-item></el-col>
         </el-row>
         <el-row :gutter="16">
           <el-col :span="12"><el-form-item label="港籍"><el-input v-model="shipForm.port_registry" /></el-form-item></el-col>
           <el-col :span="12">
             <el-form-item label="水域类型">
               <el-select v-model="shipForm.water_type" style="width: 100%">
-                <el-option label="内河" value="内河" /><el-option label="近海" value="近海" />
+                <el-option label="内河" value="内河" />
+                <el-option label="沿海" value="沿海" />
+                <el-option label="远洋" value="远洋" />
               </el-select>
             </el-form-item>
           </el-col>
         </el-row>
         <el-row :gutter="16">
-          <el-col :span="12"><el-form-item label="主机品牌"><el-input v-model="shipForm.engine_brand" /></el-form-item></el-col>
-          <el-col :span="12"><el-form-item label="主机力量(千瓦)"><el-input-number v-model="shipForm.engine_power" :min="0" style="width:100%" /></el-form-item></el-col>
+          <el-col :span="8"><el-form-item label="主机品牌"><el-input v-model="shipForm.engine_brand" /></el-form-item></el-col>
+          <el-col :span="8"><el-form-item label="主机力量(千瓦)"><el-input-number v-model="shipForm.engine_power" :min="0" style="width:100%" /></el-form-item></el-col>
+          <el-col :span="8"><el-form-item label="主机数量(台)"><el-input-number v-model="shipForm.engine_count" :min="1" style="width:100%" /></el-form-item></el-col>
         </el-row>
         <el-row :gutter="16">
           <el-col :span="12">
@@ -134,6 +143,13 @@
             </el-form-item>
           </el-col>
         </el-row>
+        <el-row :gutter="16">
+          <el-col :span="24">
+            <el-form-item label="其他描述">
+              <el-input v-model="shipForm.description" type="textarea" :rows="3" placeholder="船舶其他说明信息" />
+            </el-form-item>
+          </el-col>
+        </el-row>
       </el-form>
       <template #footer>
         <el-button @click="formVisible = false">取消</el-button>
@@ -158,7 +174,7 @@ const formVisible = ref(false)
 const isEdit = ref(false)
 const currentShip = ref(null)
 
-const emptyForm = { ship_no: '', ship_type: '散货船', total_length: 0, width: 0, depth: 0, deadweight: 0, gross_tonnage: 0, build_date: '', build_province: '', port_registry: '', engine_brand: '', engine_power: 0, water_type: '内河', ship_condition: '良好', price: 0, contact_name: '', contact_phone: '', status: 1 }
+const emptyForm = { ship_no: '', ship_type: '干散货船', total_length: 0, width: 0, depth: 0, deadweight: 0, gross_tonnage: 0, build_date: '', build_province: '', port_registry: '', engine_brand: '', engine_power: 0, engine_count: 1, water_type: '内河', ship_condition: '良好', price: 0, contact_name: '', contact_phone: '', description: '', status: 1 }
 const shipForm = ref({ ...emptyForm })
 
 function formatPrice(price) {

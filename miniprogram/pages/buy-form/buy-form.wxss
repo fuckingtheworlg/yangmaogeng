@@ -157,6 +157,26 @@
   font-weight: 600;
 }
 
+/* Radio */
+.radio-group {
+  display: flex;
+  gap: 12rpx;
+}
+.radio-item {
+  padding: 12rpx 28rpx;
+  border-radius: var(--radius-full);
+  font-size: 24rpx;
+  color: var(--color-text-secondary);
+  background: var(--color-bg);
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+.radio-item.active {
+  color: var(--color-info);
+  background: #EBF5FF;
+  font-weight: 600;
+}
+
 /* Picker */
 .form-picker {
   flex: 1;
@@ -185,8 +205,33 @@
   padding: 16rpx 24rpx;
   box-shadow: 0 -4rpx 20rpx rgba(0,0,0,0.06);
   z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+.phone-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  padding: 22rpx 24rpx;
+  border-radius: var(--radius-full);
+  border: 2rpx solid var(--color-info);
+  color: var(--color-info);
+  background: var(--color-card);
+  font-size: 26rpx;
+  font-weight: 600;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+.phone-btn:active {
+  background: #EBF5FF;
+}
+.phone-btn-text {
+  font-size: 26rpx;
 }
 .submit-btn {
+  flex: 1;
   background: linear-gradient(135deg, #3399FF, var(--color-info));
   color: #fff;
   border-radius: var(--radius-full);
