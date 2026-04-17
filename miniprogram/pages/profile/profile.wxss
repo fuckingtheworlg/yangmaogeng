@@ -288,39 +288,42 @@
   color: var(--color-text);
   font-weight: 500;
 }
-.avatar-actions {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 20rpx;
+.avatar-upload {
+  position: relative;
+  width: 160rpx;
+  height: 160rpx;
+  margin: 10rpx auto 12rpx;
 }
-.avatar-preview {
-  width: 96rpx;
-  height: 96rpx;
+.avatar-preview-lg {
+  width: 160rpx;
+  height: 160rpx;
   border-radius: 50%;
   background: var(--color-bg);
-  border: 2rpx solid var(--color-border);
+  border: 4rpx solid var(--color-card);
+  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.12);
 }
-.avatar-wx-btn {
-  margin: 0;
-  padding: 10rpx 24rpx;
-  font-size: 24rpx;
-  color: var(--color-primary);
-  background: var(--color-primary-bg);
-  border-radius: 100rpx;
-  line-height: 1.6;
-  border: none;
+.avatar-camera-badge {
+  position: absolute;
+  right: -4rpx;
+  bottom: -4rpx;
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  background: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4rpx 12rpx rgba(204,0,0,0.4);
 }
-.avatar-wx-btn::after {
-  border: none;
+.avatar-camera-badge .icon-camera {
+  color: #fff;
 }
-.login-tip {
+.avatar-tip {
   display: block;
-  font-size: 22rpx;
+  text-align: center;
+  font-size: 24rpx;
   color: var(--color-text-hint);
-  margin-top: 14rpx;
-  line-height: 1.6;
+  margin-bottom: 16rpx;
 }
 .nickname-input {
   flex: 1;

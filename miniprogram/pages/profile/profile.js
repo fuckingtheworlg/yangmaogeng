@@ -94,15 +94,6 @@ Page({
     this.setData({ showLoginModal: false })
   },
 
-  onChooseAvatar(e) {
-    const { avatarUrl } = e.detail
-    if (!avatarUrl) {
-      wx.showToast({ title: '获取头像失败，请手动上传', icon: 'none' })
-      return
-    }
-    this.setData({ tempAvatar: avatarUrl })
-  },
-
   chooseAvatarManually() {
     wx.chooseMedia({
       count: 1,
