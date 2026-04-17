@@ -94,9 +94,17 @@ Page({
     this.setData({ showLoginModal: false })
   },
 
-  onChooseAvatar(e) {
-    const { avatarUrl } = e.detail
-    this.setData({ tempAvatar: avatarUrl })
+  chooseAvatarFromAlbum() {
+    wx.chooseMedia({
+      count: 1,
+      mediaType: ['image'],
+      sourceType: ['album', 'camera'],
+      sizeType: ['compressed'],
+      success: (res) => {
+        const tempFilePath = res.tempFiles[0].tempFilePath
+        this.setData({ tempAvatar: tempFilePath })
+      }
+    })
   },
 
   onNicknameInput(e) {
@@ -109,9 +117,23 @@ Page({
       wx.showToast({ title: '请填写昵称', icon: 'none' })
       return
     }
+
+    let savedAvatar = ''
+    if (tempAvatar) {
+      try {
+        const fs = wx.getFileSystemManager()
+        const ext = tempAvatar.includes('.png') ? '.png' : '.jpg'
+        const savedPath = `${wx.env.USER_DATA_PATH}/avatar${ext}`
+        fs.saveFileSync(tempAvatar, savedPath)
+        savedAvatar = savedPath
+      } catch (e) {
+        savedAvatar = tempAvatar
+      }
+    }
+
     const userInfo = {
       nickName: tempNickname.trim(),
-      avatarUrl: tempAvatar || ''
+      avatarUrl: savedAvatar
     }
     wx.setStorageSync('userInfo', userInfo)
     this.setData({

@@ -88,12 +88,12 @@
         <text class="login-modal-subtitle">请授权获取微信头像和昵称</text>
       </view>
 
-      <view class="login-row">
+      <view class="login-row" bindtap="chooseAvatarFromAlbum">
         <text class="login-row-label">头像</text>
-        <button class="avatar-picker" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+        <view class="avatar-picker-wrap">
           <image class="avatar-preview" src="{{tempAvatar || '/images/avatar-default.png'}}" mode="aspectFill" />
-          <text class="avatar-picker-hint" wx:if="{{!tempAvatar}}">点击选择</text>
-        </button>
+          <text class="avatar-picker-hint">{{tempAvatar ? '重新选择' : '点击选择'}}</text>
+        </view>
       </view>
 
       <view class="login-row">
