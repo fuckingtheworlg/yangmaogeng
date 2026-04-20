@@ -20,6 +20,7 @@
       <el-table-column prop="deadweight" label="载货吨" width="80" />
       <el-table-column prop="gross_tonnage" label="总吨位" width="80" />
       <el-table-column prop="net_tonnage" label="净吨" width="70" />
+      <el-table-column prop="port_registry" label="港籍" width="80" />
       <el-table-column prop="build_date" label="建造时间" width="100" />
       <el-table-column prop="build_province" label="建造地点" width="90" />
       <el-table-column prop="engine_brand" label="主机品牌" width="90" />

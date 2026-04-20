@@ -31,9 +31,6 @@
           <el-table-column prop="engine_power" label="主机功率" width="90">
             <template #default="{ row }">{{ row.engine_power }}千瓦</template>
           </el-table-column>
-          <el-table-column prop="engine_count" label="主机数量" width="90">
-            <template #default="{ row }">{{ row.engine_count || 1 }}台</template>
-          </el-table-column>
           <el-table-column prop="water_type" label="内河/沿海" width="90" />
           <el-table-column prop="ship_type" label="船型" width="80" />
           <el-table-column prop="budget" label="求购预算" width="100">
@@ -89,9 +86,6 @@
           <el-table-column prop="engine_brand" label="主机品牌" width="90" />
           <el-table-column prop="engine_power" label="主机功率" width="80">
             <template #default="{ row }">{{ row.engine_power }}千瓦</template>
-          </el-table-column>
-          <el-table-column prop="engine_count" label="主机数量" width="90">
-            <template #default="{ row }">{{ row.engine_count || 1 }}台</template>
           </el-table-column>
           <el-table-column prop="water_type" label="内河/沿海" width="90" />
           <el-table-column prop="ship_type" label="船型" width="80" />
@@ -286,10 +280,9 @@
           <el-col :span="12"><el-form-item label="船型"><el-input v-model="importForm.ship_type" /></el-form-item></el-col>
         </el-row>
         <el-row :gutter="16">
-          <el-col :span="6"><el-form-item label="主机品牌"><el-input v-model="importForm.engine_brand" /></el-form-item></el-col>
-          <el-col :span="6"><el-form-item label="主机功率"><el-input-number v-model="importForm.engine_power" :min="0" style="width:100%" /></el-form-item></el-col>
-          <el-col :span="6"><el-form-item label="主机数量"><el-input-number v-model="importForm.engine_count" :min="1" style="width:100%" /></el-form-item></el-col>
-          <el-col :span="6">
+          <el-col :span="8"><el-form-item label="主机品牌"><el-input v-model="importForm.engine_brand" /></el-form-item></el-col>
+          <el-col :span="8"><el-form-item label="主机功率"><el-input-number v-model="importForm.engine_power" :min="0" style="width:100%" /></el-form-item></el-col>
+          <el-col :span="8">
             <el-form-item label="水域">
               <el-select v-model="importForm.water_type" style="width:100%">
                 <el-option label="内河" value="内河" />
@@ -573,7 +566,6 @@ function openImport(row) {
     port_registry: row.port_registry || '',
     engine_brand: row.engine_brand || '',
     engine_power: row.engine_power || 0,
-    engine_count: row.engine_count || 1,
     water_type: row.water_type || '内河',
     price: parseFloat(row.price) || 0,
     base_price: 0,
