@@ -36,6 +36,10 @@
         <text class="ship-no-label">船舶编号</text>
         <text class="ship-no-value">{{ship.ship_no}}</text>
       </view>
+      <view class="no-row" wx:if="{{ship.ship_name}}">
+        <text class="ship-no-label">船号</text>
+        <text class="ship-no-value">{{ship.ship_name}}</text>
+      </view>
     </view>
 
     <!-- 基本参数 -->

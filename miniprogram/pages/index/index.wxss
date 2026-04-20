@@ -239,4 +239,14 @@
 .ship-no {
   font-size: 20rpx;
   color: var(--color-text-hint);
+  max-width: 180rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ship-name {
+  font-size: 22rpx;
+  color: var(--color-text-secondary);
+  margin-left: 12rpx;
+  font-weight: 500;
 }

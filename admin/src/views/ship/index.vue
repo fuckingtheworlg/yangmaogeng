@@ -13,26 +13,50 @@
 
     <el-table :data="tableData" border stripe style="width: 100%" size="small" @row-click="handleRowClick" v-loading="loading">
       <el-table-column prop="ship_no" label="编号" width="140" />
-      <el-table-column prop="ship_type" label="船型" width="80" />
+      <el-table-column prop="ship_name" label="船号" width="120" />
       <el-table-column prop="total_length" label="总长" width="70" />
       <el-table-column prop="width" label="型宽" width="70" />
       <el-table-column prop="depth" label="型深" width="70" />
-      <el-table-column prop="deadweight" label="载荷吨" width="80" />
-      <el-table-column prop="gross_tonnage" label="总吨" width="70" />
+      <el-table-column prop="deadweight" label="载货吨" width="80" />
+      <el-table-column prop="gross_tonnage" label="总吨位" width="80" />
+      <el-table-column prop="net_tonnage" label="净吨" width="70" />
       <el-table-column prop="build_date" label="建造时间" width="100" />
-      <el-table-column prop="build_province" label="建造省" width="80" />
+      <el-table-column prop="build_province" label="建造地点" width="90" />
       <el-table-column prop="engine_brand" label="主机品牌" width="90" />
-      <el-table-column prop="engine_power" label="主机力量" width="90">
+      <el-table-column prop="engine_power" label="主机功率" width="90">
         <template #default="{ row }">{{ row.engine_power }}千瓦</template>
       </el-table-column>
-      <el-table-column prop="engine_count" label="主机数量" width="90">
-        <template #default="{ row }">{{ row.engine_count || 1 }}台</template>
-      </el-table-column>
-      <el-table-column prop="water_type" label="水域" width="80" />
-      <el-table-column prop="ship_condition" label="船况" width="70" />
-      <el-table-column prop="price" label="估价" width="100">
+      <el-table-column prop="water_type" label="内河/海船" width="90" />
+      <el-table-column prop="ship_type" label="船型" width="80" />
+      <el-table-column prop="price" label="售价" width="100">
         <template #default="{ row }">
           <span style="color: #CC0000; font-weight: bold">{{ formatPrice(row.price) }}万元</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="照片" width="80">
+        <template #default="{ row }">
+          <el-image
+            v-if="firstImage(row.images)"
+            :src="resolveUrl(firstImage(row.images))"
+            :preview-src-list="parseList(row.images).map(resolveUrl)"
+            fit="cover"
+            style="width: 46px; height: 46px; border-radius: 4px"
+            preview-teleported
+          />
+          <span v-else style="color:#bbb">-</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="证书" width="80">
+        <template #default="{ row }">
+          <el-image
+            v-if="firstImage(row.certificates)"
+            :src="resolveUrl(firstImage(row.certificates))"
+            :preview-src-list="parseList(row.certificates).map(resolveUrl)"
+            fit="cover"
+            style="width: 46px; height: 46px; border-radius: 4px"
+            preview-teleported
+          />
+          <span v-else style="color:#bbb">-</span>
         </template>
       </el-table-column>
       <el-table-column label="状态" width="80">
@@ -79,36 +103,76 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="detailVisible" title="船舶详情" width="700px">
+    <el-dialog v-model="detailVisible" title="船舶详情" width="780px">
       <div class="detail-grid" v-if="currentShip">
         <div class="detail-item"><span class="dl">编号：</span>{{ currentShip.ship_no }}</div>
+        <div class="detail-item"><span class="dl">船号：</span>{{ currentShip.ship_name || '-' }}</div>
         <div class="detail-item"><span class="dl">船型：</span>{{ currentShip.ship_type }}</div>
         <div class="detail-item"><span class="dl">总长：</span>{{ currentShip.total_length }}米</div>
         <div class="detail-item"><span class="dl">型宽：</span>{{ currentShip.width }}米</div>
         <div class="detail-item"><span class="dl">型深：</span>{{ currentShip.depth }}米</div>
-        <div class="detail-item"><span class="dl">载荷吨：</span>{{ currentShip.deadweight }}吨</div>
+        <div class="detail-item"><span class="dl">载货吨：</span>{{ currentShip.deadweight }}吨</div>
         <div class="detail-item"><span class="dl">总吨：</span>{{ currentShip.gross_tonnage }}吨</div>
+        <div class="detail-item"><span class="dl">净吨：</span>{{ currentShip.net_tonnage || 0 }}吨</div>
         <div class="detail-item"><span class="dl">建造时间：</span>{{ currentShip.build_date }}</div>
-        <div class="detail-item"><span class="dl">建造省：</span>{{ currentShip.build_province }}</div>
+        <div class="detail-item"><span class="dl">建造地点：</span>{{ currentShip.build_province }}</div>
         <div class="detail-item"><span class="dl">港籍：</span>{{ currentShip.port_registry }}</div>
         <div class="detail-item"><span class="dl">主机品牌：</span>{{ currentShip.engine_brand }}</div>
-        <div class="detail-item"><span class="dl">主机力量：</span>{{ currentShip.engine_power }}千瓦</div>
+        <div class="detail-item"><span class="dl">主机功率：</span>{{ currentShip.engine_power }}千瓦</div>
         <div class="detail-item"><span class="dl">主机数量：</span>{{ currentShip.engine_count || 1 }}台</div>
         <div class="detail-item"><span class="dl">水域：</span>{{ currentShip.water_type }}</div>
         <div class="detail-item"><span class="dl">船况：</span>{{ currentShip.ship_condition }}</div>
-        <div class="detail-item"><span class="dl">估价：</span><span style="color:#CC0000;font-weight:bold">{{ formatPrice(currentShip.price) }}万元</span></div>
+        <div class="detail-item"><span class="dl">起价：</span>{{ formatPrice(currentShip.base_price) }}万元</div>
+        <div class="detail-item"><span class="dl">售价：</span><span style="color:#CC0000;font-weight:bold">{{ formatPrice(currentShip.price) }}万元</span></div>
         <div class="detail-item"><span class="dl">联系人：</span>{{ currentShip.contact_name }}</div>
         <div class="detail-item"><span class="dl">电话：</span>{{ currentShip.contact_phone }}</div>
+        <div class="detail-item" style="grid-column: span 2">
+          <span class="dl">照片：</span>
+          <el-image
+            v-for="(url, i) in parseList(currentShip.images)"
+            :key="'i'+i"
+            :src="resolveUrl(url)"
+            :preview-src-list="parseList(currentShip.images).map(resolveUrl)"
+            :initial-index="i"
+            fit="cover"
+            style="width: 72px; height: 72px; margin: 4px; border-radius: 4px"
+            preview-teleported
+          />
+          <span v-if="!parseList(currentShip.images).length" style="color:#bbb">-</span>
+        </div>
+        <div class="detail-item" style="grid-column: span 2">
+          <span class="dl">证书：</span>
+          <el-image
+            v-for="(url, i) in parseList(currentShip.certificates)"
+            :key="'c'+i"
+            :src="resolveUrl(url)"
+            :preview-src-list="parseList(currentShip.certificates).map(resolveUrl)"
+            :initial-index="i"
+            fit="cover"
+            style="width: 72px; height: 72px; margin: 4px; border-radius: 4px"
+            preview-teleported
+          />
+          <span v-if="!parseList(currentShip.certificates).length" style="color:#bbb">-</span>
+        </div>
         <div class="detail-item" style="grid-column: span 2"><span class="dl">其他描述：</span>{{ currentShip.description || '-' }}</div>
       </div>
     </el-dialog>
 
-    <el-dialog v-model="formVisible" :title="isEdit ? '编辑船舶' : '新增船舶'" width="700px">
+    <el-dialog v-model="formVisible" :title="isEdit ? '编辑船舶' : '新增船舶'" width="780px">
       <el-form :model="shipForm" label-width="100px" size="default">
         <el-row :gutter="16">
           <el-col :span="12">
-            <el-form-item label="船舶编号"><el-input v-model="shipForm.ship_no" /></el-form-item>
+            <el-form-item label="船舶编号">
+              <el-input v-model="shipForm.ship_no" placeholder="留空自动生成 YYYYMMDDXXXX" />
+            </el-form-item>
           </el-col>
+          <el-col :span="12">
+            <el-form-item label="船号">
+              <el-input v-model="shipForm.ship_name" placeholder="如 江海通达01" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="16">
           <el-col :span="12">
             <el-form-item label="船型">
               <el-select v-model="shipForm.ship_type" style="width: 100%">
@@ -121,6 +185,15 @@
               </el-select>
             </el-form-item>
           </el-col>
+          <el-col :span="12">
+            <el-form-item label="船况">
+              <el-select v-model="shipForm.ship_condition" style="width: 100%">
+                <el-option label="优秀" value="优秀" />
+                <el-option label="良好" value="良好" />
+                <el-option label="一般" value="一般" />
+              </el-select>
+            </el-form-item>
+          </el-col>
         </el-row>
         <el-row :gutter="16">
           <el-col :span="8"><el-form-item label="总长(米)"><el-input-number v-model="shipForm.total_length" :min="0" style="width:100%" /></el-form-item></el-col>
@@ -128,8 +201,9 @@
           <el-col :span="8"><el-form-item label="型深(米)"><el-input-number v-model="shipForm.depth" :min="0" style="width:100%" /></el-form-item></el-col>
         </el-row>
         <el-row :gutter="16">
-          <el-col :span="12"><el-form-item label="载重吨"><el-input-number v-model="shipForm.deadweight" :min="0" style="width:100%" /></el-form-item></el-col>
-          <el-col :span="12"><el-form-item label="总吨"><el-input-number v-model="shipForm.gross_tonnage" :min="0" style="width:100%" /></el-form-item></el-col>
+          <el-col :span="8"><el-form-item label="载重吨"><el-input-number v-model="shipForm.deadweight" :min="0" style="width:100%" /></el-form-item></el-col>
+          <el-col :span="8"><el-form-item label="总吨"><el-input-number v-model="shipForm.gross_tonnage" :min="0" style="width:100%" /></el-form-item></el-col>
+          <el-col :span="8"><el-form-item label="净吨"><el-input-number v-model="shipForm.net_tonnage" :min="0" style="width:100%" /></el-form-item></el-col>
         </el-row>
         <el-row :gutter="16">
           <el-col :span="12"><el-form-item label="建造时间"><el-date-picker v-model="shipForm.build_date" type="month" value-format="YYYY-MM" style="width:100%" /></el-form-item></el-col>
@@ -153,16 +227,8 @@
           <el-col :span="8"><el-form-item label="主机数量(台)"><el-input-number v-model="shipForm.engine_count" :min="1" style="width:100%" /></el-form-item></el-col>
         </el-row>
         <el-row :gutter="16">
-          <el-col :span="12">
-            <el-form-item label="船况">
-              <el-select v-model="shipForm.ship_condition" style="width: 100%">
-                <el-option label="优秀" value="优秀" />
-                <el-option label="良好" value="良好" />
-                <el-option label="一般" value="一般" />
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12"><el-form-item label="估价(万元)"><el-input-number v-model="shipForm.price" :min="0" style="width:100%" /></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="起价(万元)"><el-input-number v-model="shipForm.base_price" :min="0" style="width:100%" /></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="售价(万元)"><el-input-number v-model="shipForm.price" :min="0" style="width:100%" /></el-form-item></el-col>
         </el-row>
         <el-row :gutter="16">
           <el-col :span="12"><el-form-item label="联系人"><el-input v-model="shipForm.contact_name" /></el-form-item></el-col>
@@ -176,6 +242,18 @@
                 <el-option label="下架" :value="0" />
                 <el-option label="已售" :value="2" />
               </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="16">
+          <el-col :span="12">
+            <el-form-item label="照片">
+              <ImageUploader v-model="shipForm.images" hint="最多 9 张，支持点击预览" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="证书">
+              <ImageUploader v-model="shipForm.certificates" hint="最多 9 张，支持点击预览" />
             </el-form-item>
           </el-col>
         </el-row>
@@ -200,6 +278,29 @@ import { ref, onMounted } from 'vue'
 import { Search, Plus } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getShips, addShip, updateShip, deleteShip, finalizeShip } from '../../api/admin'
+import ImageUploader from '../../components/ImageUploader.vue'
+
+const API_BASE = 'http://47.114.89.50'
+function parseList(raw) {
+  if (!raw) return []
+  if (Array.isArray(raw)) return raw.filter(Boolean)
+  try {
+    const v = JSON.parse(raw)
+    return Array.isArray(v) ? v.filter(Boolean) : []
+  } catch {
+    return []
+  }
+}
+function firstImage(raw) {
+  const list = parseList(raw)
+  return list.length ? list[0] : ''
+}
+function resolveUrl(url) {
+  if (!url) return ''
+  if (url.startsWith('http')) return url
+  if (url.startsWith('/uploads')) return API_BASE + url
+  return url
+}
 
 const tableData = ref([])
 const loading = ref(false)
@@ -210,7 +311,7 @@ const formVisible = ref(false)
 const isEdit = ref(false)
 const currentShip = ref(null)
 
-const emptyForm = { ship_no: '', ship_type: '干散货船', total_length: 0, width: 0, depth: 0, deadweight: 0, gross_tonnage: 0, build_date: '', build_province: '', port_registry: '', engine_brand: '', engine_power: 0, engine_count: 1, water_type: '内河', ship_condition: '良好', price: 0, contact_name: '', contact_phone: '', description: '', status: 1 }
+const emptyForm = { ship_no: '', ship_name: '', ship_type: '干散货船', total_length: 0, width: 0, depth: 0, deadweight: 0, gross_tonnage: 0, net_tonnage: 0, build_date: '', build_province: '', port_registry: '', engine_brand: '', engine_power: 0, engine_count: 1, water_type: '内河', ship_condition: '良好', price: 0, base_price: 0, images: [], certificates: [], contact_name: '', contact_phone: '', description: '', status: 1 }
 const shipForm = ref({ ...emptyForm })
 
 const finalizeVisible = ref(false)
@@ -317,13 +418,22 @@ function handleRowClick(row) {
 
 function handleAdd() {
   isEdit.value = false
-  shipForm.value = { ...emptyForm }
+  shipForm.value = { ...emptyForm, images: [], certificates: [] }
   formVisible.value = true
 }
 
 function handleEdit(row) {
   isEdit.value = true
-  shipForm.value = { ...row, price: parseFloat(row.price), total_length: parseFloat(row.total_length), width: parseFloat(row.width), depth: parseFloat(row.depth) }
+  shipForm.value = {
+    ...row,
+    price: parseFloat(row.price) || 0,
+    base_price: parseFloat(row.base_price) || 0,
+    total_length: parseFloat(row.total_length) || 0,
+    width: parseFloat(row.width) || 0,
+    depth: parseFloat(row.depth) || 0,
+    images: parseList(row.images),
+    certificates: parseList(row.certificates)
+  }
   formVisible.value = true
 }
 

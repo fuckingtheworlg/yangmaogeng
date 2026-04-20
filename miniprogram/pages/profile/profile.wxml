@@ -62,6 +62,7 @@
           <text class="commission-type {{item.type === 'sell' ? 'type-sell' : 'type-buy'}}">
             {{item.type === 'sell' ? '出售' : '求购'}}
           </text>
+          <text class="commission-code" wx:if="{{item.code}}">{{item.code}}</text>
         </view>
         <text class="list-no">{{item.contact_name}} {{item.gender || ''}}</text>
         <text class="list-tonnage" wx:if="{{item.deadweight}}">{{item.deadweight}} 吨</text>

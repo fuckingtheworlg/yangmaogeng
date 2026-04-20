@@ -7,34 +7,37 @@
     </div>
 
     <el-table :data="tableData" border stripe style="width: 100%" size="small" v-loading="loading">
-      <el-table-column prop="id" label="编号" width="80" />
-      <el-table-column prop="nickname" label="用户名" width="120" />
+      <el-table-column label="编号" width="100">
+        <template #default="{ row }">{{ String(row.id).padStart(5, '0') }}</template>
+      </el-table-column>
+      <el-table-column prop="nickname" label="用户名" width="140" />
       <el-table-column prop="phone" label="电话" width="140" />
-      <el-table-column label="委托编号" min-width="220">
+      <el-table-column label="委托编号" min-width="260">
         <template #default="{ row }">
           <el-tag
-            v-for="cid in parseIds(row.commission_ids)"
-            :key="cid"
+            v-for="code in parseIds(row.commission_codes)"
+            :key="code"
             size="small"
             effect="plain"
+            :type="code.startsWith('GM') ? 'warning' : 'success'"
             style="margin: 2px 4px 2px 0; cursor: pointer"
-            @click="goCommission(cid)"
-          >{{ cid }}</el-tag>
-          <span v-if="!parseIds(row.commission_ids).length" style="color:#bbb">-</span>
+            @click="goCommission(code)"
+          >{{ code }}</el-tag>
+          <span v-if="!parseIds(row.commission_codes).length" style="color:#bbb">-</span>
         </template>
       </el-table-column>
-      <el-table-column label="关注编号" min-width="220">
+      <el-table-column label="关注编号" min-width="260">
         <template #default="{ row }">
           <el-tag
-            v-for="fid in parseIds(row.favorite_ids)"
-            :key="fid"
-            type="success"
+            v-for="sn in parseIds(row.favorite_ship_nos)"
+            :key="sn"
+            type="info"
             size="small"
             effect="plain"
             style="margin: 2px 4px 2px 0; cursor: pointer"
-            @click="goShip(fid)"
-          >{{ fid }}</el-tag>
-          <span v-if="!parseIds(row.favorite_ids).length" style="color:#bbb">-</span>
+            @click="goShipByNo(sn)"
+          >{{ sn }}</el-tag>
+          <span v-if="!parseIds(row.favorite_ship_nos).length" style="color:#bbb">-</span>
         </template>
       </el-table-column>
       <el-table-column label="操作" width="140" fixed="right">
@@ -72,12 +75,12 @@ function parseIds(str) {
   return String(str).split(',').filter(Boolean).map(s => s.trim())
 }
 
-function goCommission(id) {
-  router.push({ path: '/commission', query: { id } })
+function goCommission(code) {
+  router.push({ path: '/commission', query: { keyword: code } })
 }
 
-function goShip(id) {
-  router.push({ path: '/ship', query: { id } })
+function goShipByNo(shipNo) {
+  router.push({ path: '/ship', query: { ship_no: shipNo } })
 }
 
 const tableData = ref([])

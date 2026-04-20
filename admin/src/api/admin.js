@@ -18,6 +18,7 @@ export const deleteUser = (id) => api.delete(`/admin/users/${id}`)
 
 // 委托
 export const getCommissions = (params) => api.get('/admin/commissions', { params })
+export const addCommission = (data) => api.post('/admin/commissions', data)
 export const updateCommission = (id, data) => api.put(`/admin/commissions/${id}`, data)
 export const importCommissionToShip = (id, data) => api.post(`/admin/commissions/${id}/import-ship`, data)
 

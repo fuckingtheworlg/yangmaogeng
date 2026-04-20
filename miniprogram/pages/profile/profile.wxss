@@ -193,6 +193,14 @@
 /* Commission */
 .commission-type-wrap {
   margin-bottom: 4rpx;
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+.commission-code {
+  font-size: 20rpx;
+  color: var(--color-text-hint);
+  letter-spacing: 0.5rpx;
 }
 .commission-type {
   font-size: 22rpx;

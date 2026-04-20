@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS admins (
 CREATE TABLE IF NOT EXISTS ships (
   id INT PRIMARY KEY AUTO_INCREMENT,
   ship_no VARCHAR(50) NOT NULL,
+  ship_name VARCHAR(100) DEFAULT '' COMMENT '船号名称',
   total_length DECIMAL(10,2) DEFAULT 0,
   width DECIMAL(10,2) DEFAULT 0,
   depth DECIMAL(10,2) DEFAULT 0,
@@ -19,6 +20,7 @@ CREATE TABLE IF NOT EXISTS ships (
   ship_condition VARCHAR(50) DEFAULT '',
   deadweight INT DEFAULT 0,
   gross_tonnage INT DEFAULT 0,
+  net_tonnage INT DEFAULT 0 COMMENT '净吨',
   build_date VARCHAR(20) DEFAULT '',
   build_province VARCHAR(50) DEFAULT '',
   port_registry VARCHAR(50) DEFAULT '',
@@ -27,6 +29,7 @@ CREATE TABLE IF NOT EXISTS ships (
   engine_count INT DEFAULT 1,
   water_type VARCHAR(20) DEFAULT '内河',
   price DECIMAL(10,2) DEFAULT 0,
+  base_price DECIMAL(10,2) DEFAULT 0 COMMENT '起价',
   images TEXT,
   certificates TEXT,
   contact_name VARCHAR(50) DEFAULT '',
@@ -59,6 +62,7 @@ CREATE TABLE IF NOT EXISTS favorites (
 
 CREATE TABLE IF NOT EXISTS commissions (
   id INT PRIMARY KEY AUTO_INCREMENT,
+  code VARCHAR(30) DEFAULT '' COMMENT '显示编号 GM/CS+年+序号',
   user_id INT,
   type ENUM('sell','buy') NOT NULL,
   contact_name VARCHAR(50) DEFAULT '',
@@ -71,6 +75,7 @@ CREATE TABLE IF NOT EXISTS commissions (
   gross_tonnage INT DEFAULT 0,
   build_date VARCHAR(20) DEFAULT '',
   build_province VARCHAR(50) DEFAULT '',
+  port_registry VARCHAR(50) DEFAULT '' COMMENT '港籍',
   water_type VARCHAR(20) DEFAULT '',
   ship_type VARCHAR(50) DEFAULT '',
   engine_brand VARCHAR(50) DEFAULT '',
@@ -79,6 +84,7 @@ CREATE TABLE IF NOT EXISTS commissions (
   year_start VARCHAR(10) DEFAULT '',
   year_end VARCHAR(10) DEFAULT '',
   budget DECIMAL(10,2) DEFAULT NULL,
+  price DECIMAL(10,2) DEFAULT NULL COMMENT '出售报价',
   ship_images TEXT,
   cert_images TEXT,
   remark TEXT,
@@ -90,6 +96,7 @@ CREATE TABLE IF NOT EXISTS commissions (
 
 CREATE TABLE IF NOT EXISTS transactions (
   id INT PRIMARY KEY AUTO_INCREMENT,
+  code VARCHAR(30) DEFAULT '' COMMENT '显示编号 CJ+年+序号',
   ship_id INT,
   commission_id INT,
   price DECIMAL(10,2) DEFAULT 0,

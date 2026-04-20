@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const pool = require('../config/db')
 const { adminAuth } = require('../middleware/auth')
+const { generateShipNo, generateCommissionCode, generateTransactionCode } = require('../utils/code')
 require('dotenv').config()
 
 // 管理员登录
@@ -59,11 +60,14 @@ router.get('/ships', adminAuth, async (req, res) => {
 router.post('/ships', adminAuth, async (req, res) => {
   try {
     const data = req.body
-    const fields = ['ship_no', 'total_length', 'width', 'depth', 'ship_type', 'ship_condition', 'deadweight', 'gross_tonnage', 'build_date', 'build_province', 'port_registry', 'engine_brand', 'engine_power', 'engine_count', 'water_type', 'price', 'images', 'certificates', 'contact_name', 'contact_phone', 'description', 'status', 'is_carousel']
+    if (!data.ship_no) {
+      data.ship_no = await generateShipNo(pool)
+    }
+    const fields = ['ship_no', 'ship_name', 'total_length', 'width', 'depth', 'ship_type', 'ship_condition', 'deadweight', 'gross_tonnage', 'net_tonnage', 'build_date', 'build_province', 'port_registry', 'engine_brand', 'engine_power', 'engine_count', 'water_type', 'price', 'base_price', 'images', 'certificates', 'contact_name', 'contact_phone', 'description', 'status', 'is_carousel']
     const values = fields.map(f => data[f] !== undefined ? (typeof data[f] === 'object' ? JSON.stringify(data[f]) : data[f]) : null)
     const sql = `INSERT INTO ships (${fields.join(',')}) VALUES (${fields.map(() => '?').join(',')})`
     const [result] = await pool.query(sql, values)
-    res.json({ code: 200, data: { id: result.insertId }, message: '新增成功' })
+    res.json({ code: 200, data: { id: result.insertId, ship_no: data.ship_no }, message: '新增成功' })
   } catch (err) {
     res.status(500).json({ code: 500, message: err.message })
   }
@@ -73,7 +77,7 @@ router.put('/ships/:id', adminAuth, async (req, res) => {
   try {
     const { id } = req.params
     const data = req.body
-    const fields = ['ship_no', 'total_length', 'width', 'depth', 'ship_type', 'ship_condition', 'deadweight', 'gross_tonnage', 'build_date', 'build_province', 'port_registry', 'engine_brand', 'engine_power', 'engine_count', 'water_type', 'price', 'images', 'certificates', 'contact_name', 'contact_phone', 'description', 'status', 'is_carousel']
+    const fields = ['ship_no', 'ship_name', 'total_length', 'width', 'depth', 'ship_type', 'ship_condition', 'deadweight', 'gross_tonnage', 'net_tonnage', 'build_date', 'build_province', 'port_registry', 'engine_brand', 'engine_power', 'engine_count', 'water_type', 'price', 'base_price', 'images', 'certificates', 'contact_name', 'contact_phone', 'description', 'status', 'is_carousel']
     const sets = []
     const values = []
     fields.forEach(f => {
@@ -108,16 +112,17 @@ router.post('/ships/:id/finalize', adminAuth, async (req, res) => {
     if (!price || !buyer_name) {
       return res.json({ code: 400, message: '请填写买家和成交价' })
     }
+    const code = await generateTransactionCode(pool)
     const today = new Date().toISOString().split('T')[0]
     const [result] = await pool.query(
-      'INSERT INTO transactions (ship_id, commission_id, price, buyer_name, buyer_phone, seller_name, seller_phone, remark, deal_date) VALUES (?,?,?,?,?,?,?,?,?)',
-      [shipId, commission_id || null, price, buyer_name, buyer_phone || '', seller_name || '', seller_phone || '', remark || '', today]
+      'INSERT INTO transactions (code, ship_id, commission_id, price, buyer_name, buyer_phone, seller_name, seller_phone, remark, deal_date) VALUES (?,?,?,?,?,?,?,?,?,?)',
+      [code, shipId, commission_id || null, price, buyer_name, buyer_phone || '', seller_name || '', seller_phone || '', remark || '', today]
     )
     await pool.query('UPDATE ships SET status = 2 WHERE id = ?', [shipId])
     if (commission_id) {
       await pool.query('UPDATE commissions SET status = 2 WHERE id = ?', [commission_id])
     }
-    res.json({ code: 200, data: { id: result.insertId }, message: '成交成功' })
+    res.json({ code: 200, data: { id: result.insertId, code }, message: '成交成功' })
   } catch (err) {
     res.status(500).json({ code: 500, message: err.message })
   }
@@ -127,7 +132,14 @@ router.post('/ships/:id/finalize', adminAuth, async (req, res) => {
 router.get('/users', adminAuth, async (req, res) => {
   try {
     const { page = 1, pageSize = 20, id: userId, phone } = req.query
-    let sql = 'SELECT u.*, GROUP_CONCAT(DISTINCT c.id) as commission_ids, GROUP_CONCAT(DISTINCT f.ship_id) as favorite_ids FROM users u LEFT JOIN commissions c ON u.id = c.user_id LEFT JOIN favorites f ON u.id = f.user_id WHERE 1=1'
+    let sql = `SELECT u.*,
+      GROUP_CONCAT(DISTINCT c.code) AS commission_codes,
+      GROUP_CONCAT(DISTINCT s.ship_no) AS favorite_ship_nos
+      FROM users u
+      LEFT JOIN commissions c ON u.id = c.user_id
+      LEFT JOIN favorites f ON u.id = f.user_id
+      LEFT JOIN ships s ON f.ship_id = s.id
+      WHERE 1=1`
     const params = []
     if (userId) { sql += ' AND u.id = ?'; params.push(Number(userId)) }
     if (phone) { sql += ' AND u.phone LIKE ?'; params.push(`%${phone}%`) }
@@ -162,12 +174,15 @@ router.delete('/users/:id', adminAuth, async (req, res) => {
 // ========== 委托管理 ==========
 router.get('/commissions', adminAuth, async (req, res) => {
   try {
-    const { page = 1, pageSize = 20, type, status, keyword } = req.query
+    const { page = 1, pageSize = 20, type, status, keyword, total_length, build_date, contact_name } = req.query
     let sql = 'SELECT * FROM commissions WHERE 1=1'
     const params = []
     if (type) { sql += ' AND type = ?'; params.push(type) }
     if (status !== undefined && status !== '') { sql += ' AND status = ?'; params.push(Number(status)) }
-    if (keyword) { sql += ' AND (CAST(id AS CHAR) LIKE ? OR phone LIKE ?)'; params.push(`%${keyword}%`, `%${keyword}%`) }
+    if (keyword) { sql += ' AND (code LIKE ? OR phone LIKE ?)'; params.push(`%${keyword}%`, `%${keyword}%`) }
+    if (total_length) { sql += ' AND total_length >= ?'; params.push(Number(total_length)) }
+    if (build_date) { sql += ' AND build_date = ?'; params.push(build_date) }
+    if (contact_name) { sql += ' AND contact_name LIKE ?'; params.push(`%${contact_name}%`) }
     sql += ' ORDER BY id DESC LIMIT ? OFFSET ?'
     params.push(Number(pageSize), (Number(page) - 1) * Number(pageSize))
     const [rows] = await pool.query(sql, params)
@@ -177,13 +192,39 @@ router.get('/commissions', adminAuth, async (req, res) => {
   }
 })
 
+// 管理员手动创建委托
+router.post('/commissions', adminAuth, async (req, res) => {
+  try {
+    const data = req.body
+    const type = data.type === 'buy' ? 'buy' : 'sell'
+    const code = await generateCommissionCode(pool, type)
+    const fields = ['code', 'type', 'contact_name', 'gender', 'phone', 'total_length', 'width', 'depth', 'deadweight', 'gross_tonnage', 'build_date', 'build_province', 'port_registry', 'water_type', 'ship_type', 'engine_brand', 'engine_power', 'engine_count', 'year_start', 'year_end', 'budget', 'price', 'ship_images', 'cert_images', 'remark']
+    const values = fields.map(f => {
+      if (f === 'code') return code
+      if (f === 'type') return type
+      if (f === 'ship_images' || f === 'cert_images') return JSON.stringify(data[f] || [])
+      return data[f] !== undefined ? data[f] : null
+    })
+    const sql = `INSERT INTO commissions (${fields.join(',')}) VALUES (${fields.map(() => '?').join(',')})`
+    const [result] = await pool.query(sql, values)
+    res.json({ code: 200, data: { id: result.insertId, code }, message: '新增成功' })
+  } catch (err) {
+    res.status(500).json({ code: 500, message: err.message })
+  }
+})
+
 router.put('/commissions/:id', adminAuth, async (req, res) => {
   try {
-    const { status, matched_ship_ids } = req.body
+    const data = req.body
+    const fields = ['status', 'matched_ship_ids', 'contact_name', 'gender', 'phone', 'total_length', 'width', 'depth', 'deadweight', 'gross_tonnage', 'build_date', 'build_province', 'port_registry', 'water_type', 'ship_type', 'engine_brand', 'engine_power', 'engine_count', 'year_start', 'year_end', 'budget', 'price', 'ship_images', 'cert_images', 'remark']
     const sets = []
     const values = []
-    if (status !== undefined) { sets.push('status = ?'); values.push(status) }
-    if (matched_ship_ids !== undefined) { sets.push('matched_ship_ids = ?'); values.push(matched_ship_ids) }
+    fields.forEach(f => {
+      if (data[f] !== undefined) {
+        sets.push(`${f} = ?`)
+        values.push(typeof data[f] === 'object' ? JSON.stringify(data[f]) : data[f])
+      }
+    })
     if (sets.length === 0) return res.json({ code: 400, message: '无更新字段' })
     values.push(req.params.id)
     await pool.query(`UPDATE commissions SET ${sets.join(',')} WHERE id = ?`, values)
@@ -202,13 +243,13 @@ router.post('/commissions/:id/import-ship', adminAuth, async (req, res) => {
     const c = rows[0]
     if (c.type !== 'sell') return res.json({ code: 400, message: '仅出售委托可导入' })
     const override = req.body || {}
-    const now = new Date()
-    const shipNo = override.ship_no || `CS${now.getFullYear()}${String(commissionId).padStart(4, '0')}`
+    const shipNo = override.ship_no || await generateShipNo(pool)
     const [result] = await pool.query(
-      `INSERT INTO ships (ship_no, total_length, width, depth, ship_type, ship_condition, deadweight, gross_tonnage, build_date, build_province, engine_brand, engine_power, engine_count, water_type, price, images, certificates, contact_name, contact_phone, status)
-       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+      `INSERT INTO ships (ship_no, ship_name, total_length, width, depth, ship_type, ship_condition, deadweight, gross_tonnage, net_tonnage, build_date, build_province, port_registry, engine_brand, engine_power, engine_count, water_type, price, base_price, images, certificates, contact_name, contact_phone, status)
+       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
       [
         shipNo,
+        override.ship_name || '',
         override.total_length || c.total_length || 0,
         override.width || c.width || 0,
         override.depth || c.depth || 0,
@@ -216,13 +257,16 @@ router.post('/commissions/:id/import-ship', adminAuth, async (req, res) => {
         override.ship_condition || '良好',
         override.deadweight || c.deadweight || 0,
         override.gross_tonnage || c.gross_tonnage || 0,
+        override.net_tonnage || 0,
         override.build_date || c.build_date || '',
         override.build_province || c.build_province || '',
+        override.port_registry || c.port_registry || '',
         override.engine_brand || c.engine_brand || '',
         override.engine_power || c.engine_power || 0,
         override.engine_count || c.engine_count || 1,
         override.water_type || c.water_type || '内河',
-        override.price || override.budget || 0,
+        override.price || c.price || c.budget || 0,
+        override.base_price || 0,
         c.ship_images || '[]',
         c.cert_images || '[]',
         c.contact_name || '',
@@ -240,12 +284,18 @@ router.post('/commissions/:id/import-ship', adminAuth, async (req, res) => {
 // ========== 交易记录 ==========
 router.get('/transactions', adminAuth, async (req, res) => {
   try {
-    const { page = 1, pageSize = 20, id: txId, build_date, price } = req.query
-    let sql = 'SELECT t.*, s.ship_no, s.total_length, s.width, s.depth, s.deadweight, s.gross_tonnage, s.build_date as ship_build_date, s.engine_brand, s.engine_power, s.water_type FROM transactions t LEFT JOIN ships s ON t.ship_id = s.id WHERE 1=1'
+    const { page = 1, pageSize = 20, id: txId, build_date, price, keyword, deadweight } = req.query
+    let sql = `SELECT t.*,
+      s.ship_no, s.ship_name, s.total_length, s.width, s.depth, s.deadweight, s.gross_tonnage,
+      s.build_date as ship_build_date, s.engine_brand, s.engine_power, s.water_type,
+      s.images as ship_images, s.certificates as ship_certificates
+      FROM transactions t LEFT JOIN ships s ON t.ship_id = s.id WHERE 1=1`
     const params = []
     if (txId) { sql += ' AND t.id = ?'; params.push(Number(txId)) }
+    if (keyword) { sql += ' AND (t.code LIKE ? OR s.ship_no LIKE ?)'; params.push(`%${keyword}%`, `%${keyword}%`) }
     if (build_date) { sql += ' AND s.build_date = ?'; params.push(build_date) }
     if (price) { sql += ' AND t.price >= ?'; params.push(Number(price)) }
+    if (deadweight) { sql += ' AND s.deadweight >= ?'; params.push(Number(deadweight)) }
     sql += ' ORDER BY t.id DESC LIMIT ? OFFSET ?'
     params.push(Number(pageSize), (Number(page) - 1) * Number(pageSize))
     const [rows] = await pool.query(sql, params)
@@ -258,11 +308,16 @@ router.get('/transactions', adminAuth, async (req, res) => {
 router.post('/transactions', adminAuth, async (req, res) => {
   try {
     const { ship_id, commission_id, price, buyer_name, buyer_phone, seller_name, seller_phone, remark, deal_date } = req.body
+    if (!ship_id || !buyer_name || !price) {
+      return res.json({ code: 400, message: '请填写船舶、买家和成交价' })
+    }
+    const code = await generateTransactionCode(pool)
     const [result] = await pool.query(
-      'INSERT INTO transactions (ship_id, commission_id, price, buyer_name, buyer_phone, seller_name, seller_phone, remark, deal_date) VALUES (?,?,?,?,?,?,?,?,?)',
-      [ship_id, commission_id, price, buyer_name, buyer_phone, seller_name, seller_phone, remark, deal_date]
+      'INSERT INTO transactions (code, ship_id, commission_id, price, buyer_name, buyer_phone, seller_name, seller_phone, remark, deal_date) VALUES (?,?,?,?,?,?,?,?,?,?)',
+      [code, ship_id, commission_id || null, price, buyer_name, buyer_phone || '', seller_name || '', seller_phone || '', remark || '', deal_date || new Date().toISOString().split('T')[0]]
     )
-    res.json({ code: 200, data: { id: result.insertId }, message: '新增成功' })
+    await pool.query('UPDATE ships SET status = 2 WHERE id = ?', [ship_id])
+    res.json({ code: 200, data: { id: result.insertId, code }, message: '新增成功' })
   } catch (err) {
     res.status(500).json({ code: 500, message: err.message })
   }
