@@ -26,6 +26,9 @@
       <el-table-column prop="engine_power" label="主机功率" width="90">
         <template #default="{ row }">{{ row.engine_power }}千瓦</template>
       </el-table-column>
+      <el-table-column prop="engine_count" label="主机数量" width="90">
+        <template #default="{ row }">{{ row.engine_count || 1 }}台</template>
+      </el-table-column>
       <el-table-column prop="water_type" label="内河/海船" width="90" />
       <el-table-column prop="ship_type" label="船型" width="80" />
       <el-table-column prop="price" label="售价" width="100">
