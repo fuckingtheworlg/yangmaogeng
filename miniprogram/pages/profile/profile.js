@@ -1,4 +1,4 @@
-const { get } = require('../../utils/request')
+const { get, post, del } = require('../../utils/request')
 const { mockShips } = require('../../utils/mock')
 const app = getApp()
 
@@ -30,6 +30,40 @@ Page({
   },
 
   loadFavorites() {
+    const token = app.globalData.token || wx.getStorageSync('token')
+    const serverUrl = app.globalData.serverUrl
+    if (token) {
+      get('/favorites').then(res => {
+        if (res && res.code === 200 && res.data && res.data.list) {
+          const list = res.data.list.map(row => {
+            let image = ''
+            if (row.images && row.images.length > 0) {
+              image = row.images[0]
+              if (image && image.startsWith('/uploads')) image = serverUrl + image
+            }
+            return {
+              id: row.ship_id,
+              ship_id: row.ship_id,
+              ship_no: row.ship_no,
+              deadweight: row.deadweight,
+              price: row.price,
+              ship_type: row.ship_type || '',
+              image
+            }
+          })
+          // 同步一份到本地作为离线缓存
+          wx.setStorageSync('favorites', list.map(x => x.ship_id))
+          this.setData({ favorites: list })
+        } else {
+          this.loadFavoritesFromLocal()
+        }
+      }).catch(() => this.loadFavoritesFromLocal())
+    } else {
+      this.loadFavoritesFromLocal()
+    }
+  },
+
+  loadFavoritesFromLocal() {
     const favIds = wx.getStorageSync('favorites') || []
     if (favIds.length === 0) {
       this.setData({ favorites: [] })
@@ -78,8 +112,39 @@ Page({
   },
 
   loadCommissions() {
-    const commissions = wx.getStorageSync('commissions') || []
-    this.setData({ commissions })
+    const token = app.globalData.token || wx.getStorageSync('token')
+    if (token) {
+      get('/commissions').then(res => {
+        if (res && res.code === 200 && res.data && res.data.list) {
+          const list = res.data.list.map(row => ({
+            id: row.id,
+            code: row.code || '',
+            type: row.type,
+            contact_name: row.contact_name,
+            gender: row.gender,
+            phone: row.phone,
+            deadweight: row.deadweight,
+            ship_type: row.ship_type,
+            create_time: this.formatTime(row.created_at),
+            status: row.status
+          }))
+          this.setData({ commissions: list })
+        } else {
+          this.setData({ commissions: wx.getStorageSync('commissions') || [] })
+        }
+      }).catch(() => {
+        this.setData({ commissions: wx.getStorageSync('commissions') || [] })
+      })
+    } else {
+      this.setData({ commissions: wx.getStorageSync('commissions') || [] })
+    }
+  },
+
+  formatTime(ts) {
+    if (!ts) return ''
+    const d = new Date(ts)
+    if (Number.isNaN(d.getTime())) return String(ts)
+    return `${d.getMonth() + 1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`
   },
 
   onLogin() {
@@ -178,26 +243,68 @@ Page({
 
   confirmLogin() {
     const { tempAvatar, tempNickname } = this.data
-    // #region agent log
-    console.log('[DEBUG-3ffe2d] [H-ALL] confirmLogin called, tempAvatar=', tempAvatar, 'tempNickname=', tempNickname)
-    // #endregion
     if (!tempNickname || !tempNickname.trim()) {
       wx.showToast({ title: '请填写昵称', icon: 'none' })
       return
     }
-    const userInfo = {
-      nickName: tempNickname.trim(),
-      avatarUrl: tempAvatar || ''
-    }
-    wx.setStorageSync('userInfo', userInfo)
-    this.setData({
-      userInfo,
-      isLogin: true,
-      showLoginModal: false,
-      tempAvatar: '',
-      tempNickname: ''
+    const nickname = tempNickname.trim()
+    const avatar = tempAvatar || ''
+    wx.showLoading({ title: '登录中...', mask: true })
+    wx.login({
+      success: (wxRes) => {
+        if (!wxRes.code) {
+          wx.hideLoading()
+          wx.showToast({ title: '微信登录失败', icon: 'none' })
+          return
+        }
+        post('/wx/login', { code: wxRes.code, nickname, avatar })
+          .then(res => {
+            wx.hideLoading()
+            if (res && res.code === 200 && res.data) {
+              const token = res.data.token
+              const userInfo = {
+                id: res.data.userInfo && res.data.userInfo.id,
+                nickName: nickname,
+                avatarUrl: avatar
+              }
+              wx.setStorageSync('token', token)
+              wx.setStorageSync('userInfo', userInfo)
+              app.globalData.token = token
+              app.globalData.userInfo = userInfo
+              this.setData({
+                userInfo,
+                isLogin: true,
+                showLoginModal: false,
+                tempAvatar: '',
+                tempNickname: ''
+              })
+              wx.showToast({ title: '登录成功', icon: 'success' })
+              this.loadFavorites()
+              this.loadCommissions()
+            } else {
+              wx.showToast({ title: (res && res.message) || '登录失败', icon: 'none' })
+            }
+          })
+          .catch(() => {
+            wx.hideLoading()
+            // 网络失败时兜底：仅写本地，保证体验不中断
+            const userInfo = { nickName: nickname, avatarUrl: avatar }
+            wx.setStorageSync('userInfo', userInfo)
+            this.setData({
+              userInfo,
+              isLogin: true,
+              showLoginModal: false,
+              tempAvatar: '',
+              tempNickname: ''
+            })
+            wx.showToast({ title: '已离线登录', icon: 'none' })
+          })
+      },
+      fail: () => {
+        wx.hideLoading()
+        wx.showToast({ title: '微信登录失败', icon: 'none' })
+      }
     })
-    wx.showToast({ title: '登录成功', icon: 'success' })
   },
 
   onLogout() {
@@ -234,10 +341,29 @@ Page({
       title: '提示',
       content: '确定取消收藏？',
       success: (res) => {
-        if (res.confirm) {
+        if (!res.confirm) return
+        const token = app.globalData.token || wx.getStorageSync('token')
+        const syncLocal = () => {
           let favIds = wx.getStorageSync('favorites') || []
           favIds = favIds.filter(id => id !== shipId)
           wx.setStorageSync('favorites', favIds)
+        }
+        if (token) {
+          del(`/favorites/${shipId}`).then(r => {
+            if (r && r.code === 200) {
+              syncLocal()
+              this.loadFavorites()
+              wx.showToast({ title: '已取消收藏', icon: 'none' })
+            } else {
+              wx.showToast({ title: (r && r.message) || '操作失败', icon: 'none' })
+            }
+          }).catch(() => {
+            syncLocal()
+            this.loadFavorites()
+            wx.showToast({ title: '已取消收藏(本地)', icon: 'none' })
+          })
+        } else {
+          syncLocal()
           this.loadFavorites()
           wx.showToast({ title: '已取消收藏', icon: 'none' })
         }

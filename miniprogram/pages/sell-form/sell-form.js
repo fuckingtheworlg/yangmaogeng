@@ -1,3 +1,6 @@
+const { post } = require('../../utils/request')
+const { uploadImages } = require('../../utils/upload')
+const { requireLogin } = require('../../utils/auth')
 const app = getApp()
 
 Page({
@@ -122,8 +125,8 @@ Page({
     })
   },
 
-  submitForm() {
-    const { form, shipImages } = this.data
+  async submitForm() {
+    const { form, shipImages, certImages } = this.data
     if (!form.contact_name || !form.phone) {
       wx.showToast({ title: '请填写称呼和电话', icon: 'none' })
       return
@@ -132,24 +135,62 @@ Page({
       wx.showToast({ title: '请填写载重吨', icon: 'none' })
       return
     }
+    if (!requireLogin('登录后可提交委托')) return
 
-    const commissions = wx.getStorageSync('commissions') || []
-    const now = new Date()
-    const timeStr = `${now.getMonth() + 1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`
-    commissions.unshift({
-      id: Date.now(),
-      type: 'sell',
-      contact_name: form.contact_name,
-      gender: form.gender,
-      phone: form.phone,
-      deadweight: form.deadweight,
-      ship_type: form.ship_type,
-      create_time: timeStr,
-      status: 0
-    })
-    wx.setStorageSync('commissions', commissions)
+    wx.showLoading({ title: '提交中...', mask: true })
+    try {
+      const ship_images = await uploadImages(shipImages)
+      const cert_images = await uploadImages(certImages)
 
-    wx.showToast({ title: '委托提交成功', icon: 'success' })
-    setTimeout(() => { wx.navigateBack() }, 1500)
+      const payload = {
+        type: 'sell',
+        contact_name: form.contact_name,
+        gender: form.gender,
+        phone: form.phone,
+        total_length: form.total_length || 0,
+        width: form.width || 0,
+        depth: form.depth || 0,
+        gross_tonnage: form.gross_tonnage || 0,
+        deadweight: form.deadweight || 0,
+        build_date: form.build_date,
+        build_province: form.build_province,
+        water_type: form.water_type,
+        ship_type: form.ship_type,
+        engine_brand: form.engine_brand,
+        engine_power: form.engine_power || 0,
+        engine_count: form.engine_count || 1,
+        ship_images,
+        cert_images
+      }
+      const res = await post('/commissions', payload)
+      wx.hideLoading()
+
+      if (res && res.code === 200) {
+        // 同步一份到本地作缓存
+        const commissions = wx.getStorageSync('commissions') || []
+        const now = new Date()
+        const timeStr = `${now.getMonth() + 1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`
+        commissions.unshift({
+          id: res.data.id,
+          code: res.data.code || '',
+          type: 'sell',
+          contact_name: form.contact_name,
+          gender: form.gender,
+          phone: form.phone,
+          deadweight: form.deadweight,
+          ship_type: form.ship_type,
+          create_time: timeStr,
+          status: 0
+        })
+        wx.setStorageSync('commissions', commissions)
+        wx.showToast({ title: '委托提交成功', icon: 'success' })
+        setTimeout(() => { wx.navigateBack() }, 1500)
+      } else {
+        wx.showToast({ title: (res && res.message) || '提交失败', icon: 'none' })
+      }
+    } catch (e) {
+      wx.hideLoading()
+      wx.showToast({ title: '网络异常，请稍后重试', icon: 'none' })
+    }
   }
 })

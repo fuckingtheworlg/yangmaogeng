@@ -1,5 +1,6 @@
-const { get } = require('../../utils/request')
+const { get, post, del } = require('../../utils/request')
 const { mockShips } = require('../../utils/mock')
+const { requireLogin } = require('../../utils/auth')
 const app = getApp()
 
 Page({
@@ -76,6 +77,14 @@ Page({
   checkFavorite(id) {
     const favList = wx.getStorageSync('favorites') || []
     this.setData({ isFavorited: favList.includes(id) })
+    const token = app.globalData.token || wx.getStorageSync('token')
+    if (token) {
+      get(`/favorites/check/${id}`).then(res => {
+        if (res && res.code === 200 && res.data) {
+          this.setData({ isFavorited: !!res.data.isFavorited })
+        }
+      }).catch(() => {})
+    }
   },
 
   goBack() {
@@ -83,18 +92,34 @@ Page({
   },
 
   toggleFavorite() {
+    if (!requireLogin('登录后可收藏船舶')) return
     const id = this.shipId
     const { isFavorited } = this.data
-    let favList = wx.getStorageSync('favorites') || []
-    if (isFavorited) {
-      favList = favList.filter(fid => fid !== id)
-      wx.showToast({ title: '已取消收藏', icon: 'none' })
-    } else {
-      favList.push(id)
-      wx.showToast({ title: '收藏成功', icon: 'success' })
+    const syncLocal = (fav) => {
+      let favList = wx.getStorageSync('favorites') || []
+      if (fav) {
+        if (!favList.includes(id)) favList.push(id)
+      } else {
+        favList = favList.filter(fid => fid !== id)
+      }
+      wx.setStorageSync('favorites', favList)
     }
-    wx.setStorageSync('favorites', favList)
-    this.setData({ isFavorited: !isFavorited })
+    const target = !isFavorited
+    this.setData({ isFavorited: target })
+    const p = target ? post('/favorites', { ship_id: id }) : del(`/favorites/${id}`)
+    p.then(res => {
+      if (res && res.code === 200) {
+        syncLocal(target)
+        wx.showToast({ title: target ? '收藏成功' : '已取消收藏', icon: target ? 'success' : 'none' })
+      } else {
+        this.setData({ isFavorited: isFavorited })
+        wx.showToast({ title: (res && res.message) || '操作失败', icon: 'none' })
+      }
+    }).catch(() => {
+      // 接口失败时回退到本地
+      syncLocal(target)
+      wx.showToast({ title: target ? '已收藏(本地)' : '已取消(本地)', icon: 'none' })
+    })
   },
 
   callPhone() {

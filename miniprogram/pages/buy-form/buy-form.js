@@ -1,3 +1,5 @@
+const { post } = require('../../utils/request')
+const { requireLogin } = require('../../utils/auth')
 const app = getApp()
 
 Page({
@@ -63,31 +65,64 @@ Page({
     wx.makePhoneCall({ phoneNumber: this.data.servicePhone })
   },
 
-  submitForm() {
+  async submitForm() {
     const { form } = this.data
     if (!form.contact_name || !form.phone) {
       wx.showToast({ title: '请填写称呼和电话', icon: 'none' })
       return
     }
+    if (!requireLogin('登录后可提交委托')) return
 
-    const commissions = wx.getStorageSync('commissions') || []
-    const now = new Date()
-    const timeStr = `${now.getMonth() + 1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`
-    commissions.unshift({
-      id: Date.now(),
-      type: 'buy',
-      contact_name: form.contact_name,
-      gender: form.gender,
-      phone: form.phone,
-      deadweight: form.deadweight || '',
-      ship_type: form.ship_type || '',
-      budget: form.budget || '',
-      create_time: timeStr,
-      status: 0
-    })
-    wx.setStorageSync('commissions', commissions)
+    wx.showLoading({ title: '提交中...', mask: true })
+    try {
+      const payload = {
+        type: 'buy',
+        contact_name: form.contact_name,
+        gender: form.gender,
+        phone: form.phone,
+        total_length: form.total_length || 0,
+        deadweight: form.deadweight || 0,
+        gross_tonnage: form.gross_tonnage || 0,
+        build_province: form.build_province,
+        ship_type: form.ship_type,
+        water_type: form.water_type,
+        engine_brand: form.engine_brand,
+        engine_power: form.engine_power || 0,
+        engine_count: form.engine_count || 1,
+        year_start: form.year_start,
+        year_end: form.year_end,
+        budget: form.budget || null,
+        remark: form.remark
+      }
+      const res = await post('/commissions', payload)
+      wx.hideLoading()
 
-    wx.showToast({ title: '委托提交成功', icon: 'success' })
-    setTimeout(() => { wx.navigateBack() }, 1500)
+      if (res && res.code === 200) {
+        const commissions = wx.getStorageSync('commissions') || []
+        const now = new Date()
+        const timeStr = `${now.getMonth() + 1}/${now.getDate()} ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`
+        commissions.unshift({
+          id: res.data.id,
+          code: res.data.code || '',
+          type: 'buy',
+          contact_name: form.contact_name,
+          gender: form.gender,
+          phone: form.phone,
+          deadweight: form.deadweight || '',
+          ship_type: form.ship_type || '',
+          budget: form.budget || '',
+          create_time: timeStr,
+          status: 0
+        })
+        wx.setStorageSync('commissions', commissions)
+        wx.showToast({ title: '委托提交成功', icon: 'success' })
+        setTimeout(() => { wx.navigateBack() }, 1500)
+      } else {
+        wx.showToast({ title: (res && res.message) || '提交失败', icon: 'none' })
+      }
+    } catch (e) {
+      wx.hideLoading()
+      wx.showToast({ title: '网络异常，请稍后重试', icon: 'none' })
+    }
   }
 })

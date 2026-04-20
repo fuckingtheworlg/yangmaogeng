@@ -7,7 +7,7 @@ require('dotenv').config()
 // 微信小程序登录
 router.post('/login', async (req, res) => {
   try {
-    const { code } = req.body
+    const { code, nickname, avatar } = req.body
     if (!code) {
       return res.json({ code: 400, message: '缺少code参数' })
     }
@@ -22,10 +22,21 @@ router.post('/login', async (req, res) => {
     let [users] = await pool.query('SELECT * FROM users WHERE openid = ?', [openid])
     let user
     if (users.length === 0) {
-      const [result] = await pool.query('INSERT INTO users (openid) VALUES (?)', [openid])
-      user = { id: result.insertId, openid }
+      const [result] = await pool.query(
+        'INSERT INTO users (openid, nickname, avatar) VALUES (?, ?, ?)',
+        [openid, nickname || '', avatar || '']
+      )
+      user = { id: result.insertId, openid, nickname: nickname || '', avatar: avatar || '' }
     } else {
       user = users[0]
+      if ((nickname && nickname !== user.nickname) || (avatar && avatar !== user.avatar)) {
+        await pool.query(
+          'UPDATE users SET nickname = ?, avatar = ? WHERE id = ?',
+          [nickname || user.nickname || '', avatar || user.avatar || '', user.id]
+        )
+        user.nickname = nickname || user.nickname || ''
+        user.avatar = avatar || user.avatar || ''
+      }
     }
 
     const token = jwt.sign({ id: user.id, role: 'user' }, process.env.JWT_SECRET, { expiresIn: '30d' })
