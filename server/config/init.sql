@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS ships (
   contact_phone VARCHAR(20) DEFAULT '',
   description TEXT,
   status TINYINT DEFAULT 1 COMMENT '0下架 1在售 2已售',
+  is_carousel TINYINT DEFAULT 0 COMMENT '0不参与 1参与首页轮播',
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -81,7 +82,8 @@ CREATE TABLE IF NOT EXISTS commissions (
   ship_images TEXT,
   cert_images TEXT,
   remark TEXT,
-  status TINYINT DEFAULT 0 COMMENT '0待处理 1已处理 2已关闭',
+  status TINYINT DEFAULT 0 COMMENT '0待处理 1已达成 2已成交 3已拒绝 4已失效',
+  matched_ship_ids VARCHAR(255) DEFAULT '' COMMENT '匹配船舶ID，逗号分隔',
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );

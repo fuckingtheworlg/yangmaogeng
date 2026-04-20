@@ -11,7 +11,8 @@ Page({
     commissions: [],
     showLoginModal: false,
     tempAvatar: '',
-    tempNickname: ''
+    tempNickname: '',
+    privacyAgreed: false
   },
 
   onShow() {
@@ -82,58 +83,111 @@ Page({
   },
 
   onLogin() {
+    // #region agent log
+    console.log('[DEBUG-3ffe2d] [H-A] onLogin called, isLogin=', this.data.isLogin, 'userInfo=', this.data.userInfo)
+    // #endregion
     if (this.data.isLogin) return
-    this.setData({
-      showLoginModal: true,
-      tempAvatar: '',
-      tempNickname: ''
-    })
+
+    const privacyCheck = wx.getPrivacySetting ? true : false
+    // #region agent log
+    console.log('[DEBUG-3ffe2d] [H-C] privacyAPI available=', privacyCheck)
+    // #endregion
+
+    if (privacyCheck) {
+      wx.getPrivacySetting({
+        success: (res) => {
+          // #region agent log
+          console.log('[DEBUG-3ffe2d] [H-C] getPrivacySetting result:', JSON.stringify(res))
+          // #endregion
+          this.setData({
+            showLoginModal: true,
+            tempAvatar: '',
+            tempNickname: '',
+            privacyAgreed: res.needAuthorization === false
+          })
+        },
+        fail: () => {
+          this.setData({
+            showLoginModal: true,
+            tempAvatar: '',
+            tempNickname: '',
+            privacyAgreed: true
+          })
+        }
+      })
+    } else {
+      this.setData({
+        showLoginModal: true,
+        tempAvatar: '',
+        tempNickname: '',
+        privacyAgreed: true
+      })
+    }
+    // #region agent log
+    console.log('[DEBUG-3ffe2d] [H-A] showLoginModal set to true')
+    // #endregion
   },
 
   closeLoginModal() {
     this.setData({ showLoginModal: false })
   },
 
-  chooseAvatarFromAlbum() {
-    wx.chooseMedia({
-      count: 1,
-      mediaType: ['image'],
-      sourceType: ['album', 'camera'],
-      sizeType: ['compressed'],
-      success: (res) => {
-        const tempFilePath = res.tempFiles[0].tempFilePath
-        this.setData({ tempAvatar: tempFilePath })
-      }
-    })
+  onAgreePrivacy() {
+    // #region agent log
+    console.log('[DEBUG-3ffe2d] [H-C] onAgreePrivacy called - user agreed to privacy')
+    // #endregion
+    this.setData({ privacyAgreed: true })
+    wx.showToast({ title: '已同意隐私协议', icon: 'success', duration: 1000 })
+  },
+
+  onChooseAvatar(e) {
+    // #region agent log
+    console.log('[DEBUG-3ffe2d] [H-B/E] onChooseAvatar fired, e.detail=', JSON.stringify(e.detail))
+    // #endregion
+    const { avatarUrl } = e.detail
+    // #region agent log
+    console.log('[DEBUG-3ffe2d] [H-E] avatarUrl=', avatarUrl)
+    // #endregion
+    this.setData({ tempAvatar: avatarUrl })
   },
 
   onNicknameInput(e) {
+    // #region agent log
+    console.log('[DEBUG-3ffe2d] [H-D] onNicknameInput fired, value=', e.detail.value)
+    // #endregion
     this.setData({ tempNickname: e.detail.value })
+  },
+
+  onNicknameBlur(e) {
+    // #region agent log
+    console.log('[DEBUG-3ffe2d] [H-D] onNicknameBlur fired, value=', e.detail.value)
+    // #endregion
+    if (e.detail.value) {
+      this.setData({ tempNickname: e.detail.value })
+    }
+  },
+
+  onNicknameConfirm(e) {
+    // #region agent log
+    console.log('[DEBUG-3ffe2d] [FIX] onNicknameConfirm fired, value=', e.detail.value)
+    // #endregion
+    if (e.detail.value) {
+      this.setData({ tempNickname: e.detail.value })
+    }
   },
 
   confirmLogin() {
     const { tempAvatar, tempNickname } = this.data
+    // #region agent log
+    console.log('[DEBUG-3ffe2d] [H-ALL] confirmLogin called, tempAvatar=', tempAvatar, 'tempNickname=', tempNickname)
+    // #endregion
     if (!tempNickname || !tempNickname.trim()) {
       wx.showToast({ title: '请填写昵称', icon: 'none' })
       return
     }
-
-    let savedAvatar = ''
-    if (tempAvatar) {
-      try {
-        const fs = wx.getFileSystemManager()
-        const ext = tempAvatar.includes('.png') ? '.png' : '.jpg'
-        const savedPath = `${wx.env.USER_DATA_PATH}/avatar${ext}`
-        fs.saveFileSync(tempAvatar, savedPath)
-        savedAvatar = savedPath
-      } catch (e) {
-        savedAvatar = tempAvatar
-      }
-    }
-
     const userInfo = {
       nickName: tempNickname.trim(),
-      avatarUrl: savedAvatar
+      avatarUrl: tempAvatar || ''
     }
     wx.setStorageSync('userInfo', userInfo)
     this.setData({

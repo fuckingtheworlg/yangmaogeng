@@ -88,12 +88,12 @@
         <text class="login-modal-subtitle">请授权获取微信头像和昵称</text>
       </view>
 
-      <view class="login-row" bindtap="chooseAvatarFromAlbum">
+      <view class="login-row">
         <text class="login-row-label">头像</text>
-        <view class="avatar-picker-wrap">
+        <button class="avatar-picker" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
           <image class="avatar-preview" src="{{tempAvatar || '/images/avatar-default.png'}}" mode="aspectFill" />
-          <text class="avatar-picker-hint">{{tempAvatar ? '重新选择' : '点击选择'}}</text>
-        </view>
+          <text class="avatar-picker-hint" wx:if="{{!tempAvatar}}">点击选择头像</text>
+        </button>
       </view>
 
       <view class="login-row">
@@ -103,9 +103,15 @@
           type="nickname"
           placeholder="请输入昵称"
           value="{{tempNickname}}"
-          bindchange="onNicknameInput"
           bindinput="onNicknameInput"
+          bindblur="onNicknameBlur"
+          bindconfirm="onNicknameConfirm"
         />
+      </view>
+
+      <view class="privacy-tip" wx:if="{{!privacyAgreed}}">
+        <text class="privacy-text">登录前请先同意</text>
+        <button class="privacy-agree-btn" open-type="agreePrivacyAuthorization" bindagreeprivacyauthorization="onAgreePrivacy">《用户隐私保护指引》</button>
       </view>
 
       <view class="login-actions">

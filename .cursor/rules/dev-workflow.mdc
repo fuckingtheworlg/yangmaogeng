@@ -1,5 +1,5 @@
 ---
-description: 开发流程防错规范 — mock 替换、问题排查、构建提交、部署验证
+description: 开发流程防错规范 — mock 替换、问题排查、平台 API、构建提交、部署验证
 alwaysApply: true
 ---
 
@@ -28,7 +28,30 @@ rg "mock" --type vue --type js --type ts -l
 
 禁止在没有证据的情况下猜测"是缓存问题"或"是网络问题"。
 
-## 3. 构建产物提交前验证
+## 3. 平台级 API 失败：先查平台配置，再改代码
+
+使用微信小程序、支付宝小程序等平台的原生 API 时，如果 API 报错或静默失败：
+
+**排查优先级**（从上到下依次排查，不可跳过）：
+
+1. **平台后台配置** — 隐私协议声明、API 权限开通、域名白名单
+2. **AppID / 基础库版本** — 当前 AppID 是否有该 API 权限，基础库版本是否满足最低要求
+3. **API 调用时序** — 是否需要先授权再调用（如隐私协议同意 → chooseAvatar）
+4. **代码层面** — 事件绑定、参数传递、返回值处理
+
+**禁止行为**：
+
+- 禁止在未确认平台配置的情况下，用 `type="text"` 替换 `type="nickname"` 等方式绕过平台 API
+- 禁止看到 API "能用"就跳过同类 API 检查（如 chooseAvatar 成功不代表 nickname 也无需配置）
+- 禁止将 `Error: timeout` 类平台内部错误归因为"网络问题"或"组件兼容性"
+
+**微信小程序隐私协议检查清单**：
+
+- `app.json` 中是否配置 `"__usePrivacyCheck__": true`
+- 微信后台"用户隐私保护指引"中是否勾选了所有用到的 API 接口
+- 代码中是否有 `wx.getPrivacySetting` + `agreePrivacyAuthorization` 处理流程
+
+## 4. 构建产物提交前验证
 
 每次重新构建 dist/ 并提交时：
 
@@ -37,7 +60,7 @@ rg "mock" --type vue --type js --type ts -l
 3. 被排除时使用 `git add -f <path>` 强制添加
 4. 提交后执行 `git show --stat HEAD`，确认文件数量符合预期
 
-## 4. 部署后端到端验证
+## 5. 部署后端到端验证
 
 每次推送到服务器后，三层验证缺一不可：
 

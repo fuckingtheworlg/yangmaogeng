@@ -288,12 +288,19 @@
   color: var(--color-text);
   font-weight: 500;
 }
-.avatar-picker-wrap {
+.avatar-picker {
   flex: 1;
+  background: transparent;
+  padding: 0;
+  margin: 0;
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 16rpx;
+  line-height: normal;
+  border: none;
+}
+.avatar-picker::after {
+  border: none;
 }
 .avatar-preview {
   width: 96rpx;
@@ -314,6 +321,34 @@
   color: var(--color-text);
   text-align: right;
 }
+.privacy-tip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16rpx 0;
+  margin-top: 16rpx;
+  flex-wrap: wrap;
+  gap: 4rpx;
+}
+.privacy-text {
+  font-size: 24rpx;
+  color: var(--color-text-hint);
+}
+.privacy-agree-btn {
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  font-size: 24rpx;
+  color: var(--color-primary);
+  font-weight: 600;
+  line-height: normal;
+  border: none;
+  display: inline;
+}
+.privacy-agree-btn::after {
+  border: none;
+}
+
 .login-actions {
   display: flex;
   gap: 20rpx;

@@ -10,8 +10,33 @@
       <el-table-column prop="id" label="编号" width="80" />
       <el-table-column prop="nickname" label="用户名" width="120" />
       <el-table-column prop="phone" label="电话" width="140" />
-      <el-table-column prop="commission_ids" label="委托编号" min-width="200" />
-      <el-table-column prop="favorite_ids" label="关注编号" min-width="200" />
+      <el-table-column label="委托编号" min-width="220">
+        <template #default="{ row }">
+          <el-tag
+            v-for="cid in parseIds(row.commission_ids)"
+            :key="cid"
+            size="small"
+            effect="plain"
+            style="margin: 2px 4px 2px 0; cursor: pointer"
+            @click="goCommission(cid)"
+          >{{ cid }}</el-tag>
+          <span v-if="!parseIds(row.commission_ids).length" style="color:#bbb">-</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="关注编号" min-width="220">
+        <template #default="{ row }">
+          <el-tag
+            v-for="fid in parseIds(row.favorite_ids)"
+            :key="fid"
+            type="success"
+            size="small"
+            effect="plain"
+            style="margin: 2px 4px 2px 0; cursor: pointer"
+            @click="goShip(fid)"
+          >{{ fid }}</el-tag>
+          <span v-if="!parseIds(row.favorite_ids).length" style="color:#bbb">-</span>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" width="140" fixed="right">
         <template #default="{ row }">
           <el-button type="primary" text size="small" @click="handleEdit(row)">编辑</el-button>
@@ -35,9 +60,25 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { Search } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getUsers, updateUser, deleteUser } from '../../api/admin'
+
+const router = useRouter()
+
+function parseIds(str) {
+  if (!str) return []
+  return String(str).split(',').filter(Boolean).map(s => s.trim())
+}
+
+function goCommission(id) {
+  router.push({ path: '/commission', query: { id } })
+}
+
+function goShip(id) {
+  router.push({ path: '/ship', query: { id } })
+}
 
 const tableData = ref([])
 const loading = ref(false)

@@ -35,13 +35,49 @@
           <span style="color: #CC0000; font-weight: bold">{{ formatPrice(row.price) }}万元</span>
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="140" fixed="right">
+      <el-table-column label="状态" width="80">
+        <template #default="{ row }">
+          <el-tag :type="statusTag(row.status).type" size="small">{{ statusTag(row.status).label }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="操作" width="360" fixed="right">
         <template #default="{ row }">
           <el-button type="primary" text size="small" @click.stop="handleEdit(row)">编辑</el-button>
+          <el-button
+            :type="row.status === 1 ? 'warning' : 'success'"
+            text size="small"
+            @click.stop="handleToggleShelf(row)"
+            :disabled="row.status === 2"
+          >{{ row.status === 1 ? '下架' : '上架' }}</el-button>
+          <el-button
+            :type="row.is_carousel ? 'info' : 'primary'"
+            text size="small"
+            @click.stop="handleToggleCarousel(row)"
+          >{{ row.is_carousel ? '取消轮播' : '轮播' }}</el-button>
+          <el-button type="success" text size="small" @click.stop="openFinalize(row)" :disabled="row.status === 2">成交</el-button>
           <el-button type="danger" text size="small" @click.stop="handleDelete(row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
+
+    <!-- 成交弹窗 -->
+    <el-dialog v-model="finalizeVisible" title="登记成交" width="540px">
+      <el-form :model="finalizeForm" label-width="100px" v-if="finalizeShipRow">
+        <el-alert type="info" :closable="false" style="margin-bottom: 16px">
+          船舶：<b>{{ finalizeShipRow.ship_no }}</b> · 估价 {{ formatPrice(finalizeShipRow.price) }} 万元
+        </el-alert>
+        <el-form-item label="买家姓名"><el-input v-model="finalizeForm.buyer_name" placeholder="请输入买家姓名" /></el-form-item>
+        <el-form-item label="买家电话"><el-input v-model="finalizeForm.buyer_phone" placeholder="请输入买家电话" /></el-form-item>
+        <el-form-item label="卖家姓名"><el-input v-model="finalizeForm.seller_name" placeholder="可选" /></el-form-item>
+        <el-form-item label="卖家电话"><el-input v-model="finalizeForm.seller_phone" placeholder="可选" /></el-form-item>
+        <el-form-item label="成交价(万元)"><el-input-number v-model="finalizeForm.price" :min="0" style="width:100%" /></el-form-item>
+        <el-form-item label="备注"><el-input v-model="finalizeForm.remark" type="textarea" :rows="2" /></el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="finalizeVisible = false">取消</el-button>
+        <el-button type="danger" @click="handleFinalize" :loading="finalizing">确认成交</el-button>
+      </template>
+    </el-dialog>
 
     <el-dialog v-model="detailVisible" title="船舶详情" width="700px">
       <div class="detail-grid" v-if="currentShip">
@@ -163,7 +199,7 @@
 import { ref, onMounted } from 'vue'
 import { Search, Plus } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getShips, addShip, updateShip, deleteShip } from '../../api/admin'
+import { getShips, addShip, updateShip, deleteShip, finalizeShip } from '../../api/admin'
 
 const tableData = ref([])
 const loading = ref(false)
@@ -177,9 +213,80 @@ const currentShip = ref(null)
 const emptyForm = { ship_no: '', ship_type: '干散货船', total_length: 0, width: 0, depth: 0, deadweight: 0, gross_tonnage: 0, build_date: '', build_province: '', port_registry: '', engine_brand: '', engine_power: 0, engine_count: 1, water_type: '内河', ship_condition: '良好', price: 0, contact_name: '', contact_phone: '', description: '', status: 1 }
 const shipForm = ref({ ...emptyForm })
 
+const finalizeVisible = ref(false)
+const finalizing = ref(false)
+const finalizeShipRow = ref(null)
+const finalizeForm = ref({ buyer_name: '', buyer_phone: '', seller_name: '', seller_phone: '', price: 0, remark: '' })
+
 function formatPrice(price) {
   const n = parseFloat(price)
   return Number.isInteger(n) ? n : n.toFixed(0)
+}
+
+function statusTag(status) {
+  if (status === 1) return { label: '在售', type: 'success' }
+  if (status === 2) return { label: '已售', type: 'info' }
+  return { label: '下架', type: 'warning' }
+}
+
+async function handleToggleShelf(row) {
+  const newStatus = row.status === 1 ? 0 : 1
+  try {
+    const res = await updateShip(row.id, { status: newStatus })
+    if (res.code === 200) {
+      ElMessage.success(newStatus === 1 ? '已上架' : '已下架')
+      fetchShips()
+    }
+  } catch (e) {
+    ElMessage.error('操作失败')
+  }
+}
+
+async function handleToggleCarousel(row) {
+  try {
+    const res = await updateShip(row.id, { is_carousel: row.is_carousel ? 0 : 1 })
+    if (res.code === 200) {
+      ElMessage.success(row.is_carousel ? '已取消轮播' : '已加入轮播')
+      fetchShips()
+    }
+  } catch (e) {
+    ElMessage.error('操作失败')
+  }
+}
+
+function openFinalize(row) {
+  finalizeShipRow.value = row
+  finalizeForm.value = {
+    buyer_name: '',
+    buyer_phone: '',
+    seller_name: row.contact_name || '',
+    seller_phone: row.contact_phone || '',
+    price: parseFloat(row.price) || 0,
+    remark: ''
+  }
+  finalizeVisible.value = true
+}
+
+async function handleFinalize() {
+  if (!finalizeForm.value.buyer_name || !finalizeForm.value.price) {
+    ElMessage.warning('请填写买家和成交价')
+    return
+  }
+  finalizing.value = true
+  try {
+    const res = await finalizeShip(finalizeShipRow.value.id, finalizeForm.value)
+    if (res.code === 200) {
+      ElMessage.success('成交成功，已生成交易记录')
+      finalizeVisible.value = false
+      fetchShips()
+    } else {
+      ElMessage.error(res.message || '操作失败')
+    }
+  } catch (e) {
+    ElMessage.error('操作失败')
+  } finally {
+    finalizing.value = false
+  }
 }
 
 async function fetchShips() {

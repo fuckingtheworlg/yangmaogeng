@@ -26,12 +26,29 @@
         </template>
       </el-table-column>
       <el-table-column prop="deal_date" label="成交日期" width="110" />
-      <el-table-column label="操作" width="100" fixed="right">
+      <el-table-column label="操作" width="160" fixed="right">
         <template #default="{ row }">
+          <el-button type="primary" text size="small" @click.stop="openEdit(row)">修改</el-button>
           <el-button type="danger" text size="small" @click.stop="handleDelete(row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
+
+    <el-dialog v-model="editVisible" title="修改交易记录" width="540px">
+      <el-form :model="editForm" label-width="100px" v-if="editForm">
+        <el-form-item label="买家姓名"><el-input v-model="editForm.buyer_name" /></el-form-item>
+        <el-form-item label="买家电话"><el-input v-model="editForm.buyer_phone" /></el-form-item>
+        <el-form-item label="卖家姓名"><el-input v-model="editForm.seller_name" /></el-form-item>
+        <el-form-item label="卖家电话"><el-input v-model="editForm.seller_phone" /></el-form-item>
+        <el-form-item label="成交价(万元)"><el-input-number v-model="editForm.price" :min="0" style="width:100%" /></el-form-item>
+        <el-form-item label="成交日期"><el-date-picker v-model="editForm.deal_date" type="date" value-format="YYYY-MM-DD" style="width:100%" /></el-form-item>
+        <el-form-item label="备注"><el-input v-model="editForm.remark" type="textarea" :rows="2" /></el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="editVisible = false">取消</el-button>
+        <el-button type="danger" @click="handleSave" :loading="saving">保存</el-button>
+      </template>
+    </el-dialog>
 
     <el-dialog v-model="detailVisible" title="交易详情" width="700px">
       <div class="detail-grid" v-if="currentItem">
@@ -61,13 +78,46 @@
 import { ref, onMounted } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getTransactions, deleteTransaction } from '../../api/admin'
+import { getTransactions, updateTransaction, deleteTransaction } from '../../api/admin'
 
 const tableData = ref([])
 const loading = ref(false)
+const saving = ref(false)
 const filters = ref({ id: '', build_date: '', price: '' })
 const detailVisible = ref(false)
 const currentItem = ref(null)
+const editVisible = ref(false)
+const editForm = ref(null)
+
+function openEdit(row) {
+  editForm.value = {
+    id: row.id,
+    buyer_name: row.buyer_name || '',
+    buyer_phone: row.buyer_phone || '',
+    seller_name: row.seller_name || '',
+    seller_phone: row.seller_phone || '',
+    price: parseFloat(row.price) || 0,
+    deal_date: row.deal_date || '',
+    remark: row.remark || ''
+  }
+  editVisible.value = true
+}
+
+async function handleSave() {
+  saving.value = true
+  try {
+    const res = await updateTransaction(editForm.value.id, editForm.value)
+    if (res.code === 200) {
+      ElMessage.success('已保存')
+      editVisible.value = false
+      fetchData()
+    }
+  } catch (e) {
+    ElMessage.error('保存失败')
+  } finally {
+    saving.value = false
+  }
+}
 
 async function fetchData() {
   loading.value = true
