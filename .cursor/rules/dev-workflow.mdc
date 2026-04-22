@@ -1,5 +1,5 @@
 ---
-description: 开发流程防错规范 — mock 替换、问题排查、平台 API、构建提交、部署验证
+description: 开发流程防错规范 — mock 替换、问题排查、平台 API、数据容错、构建提交、部署验证
 alwaysApply: true
 ---
 
@@ -51,7 +51,57 @@ rg "mock" --type vue --type js --type ts -l
 - 微信后台"用户隐私保护指引"中是否勾选了所有用到的 API 接口
 - 代码中是否有 `wx.getPrivacySetting` + `agreePrivacyAuthorization` 处理流程
 
-## 4. 构建产物提交前验证
+## 4. 数据容错与历史数据测试
+
+### 4.1 JS 类型陷阱
+
+`typeof null === 'object'`，所以"对象就序列化"这种判断永远要**先排 null**：
+
+```js
+// 错
+if (typeof v === 'object') JSON.stringify(v)   // null → '"null"' 字符串炸 INT 列
+
+// 对
+if (v === null || v === undefined) return null
+if (Array.isArray(v) || typeof v === 'object') return JSON.stringify(v)
+return v
+```
+
+后端每个写数据库的 POST/PUT 必须遵循：
+- `null / undefined` → SQL NULL（或 PUT 时跳过该字段）
+- 数组/对象 → `JSON.stringify`
+- 其他 → 原样
+
+### 4.2 Schema 迁移后必须测历史数据
+
+每次 `ALTER TABLE ADD COLUMN` 之后：
+
+1. 新数据字段值完整（测试永远 happy path）
+2. **旧数据可能是 NULL**（即使列带 DEFAULT 0，个别行可能因执行时序或历史操作遗留 NULL）
+3. 必须至少抽样编辑一条 migration 之前就存在的旧行，完整走一遍"读取 → 展开 → 修改 → 保存"
+
+禁止只用"新增的数据"测完就交付。
+
+### 4.3 `...row` 展开要警惕
+
+前端 `form = { ...row, ... }` 会把后端返回的 null、时间字符串、多余字段一起带回去提交。做法：
+- 能列白名单就只发白名单字段
+- 或者后端对 null/undefined 做幂等处理（视为不更新）
+- 数值字段（price/width/...）在 edit 时用 `parseFloat(row.x) || 0` 兜底，避免字符串混入
+
+### 4.4 错误必须可见
+
+后端所有 `catch (err)` **必须** `console.error(err)` 带 stack 打到日志，否则 journalctl 只看得到重启信息看不到错误。
+
+前端 `catch` 的 toast 必须带后端 message：
+
+```js
+ElMessage.error(res?.message || err?.response?.data?.message || '操作失败')
+```
+
+开发/预发环境，后端应把具体 SQL / 字段错误返回前端，生产环境才脱敏。
+
+## 5. 构建产物提交前验证
 
 每次重新构建 dist/ 并提交时：
 
@@ -60,7 +110,7 @@ rg "mock" --type vue --type js --type ts -l
 3. 被排除时使用 `git add -f <path>` 强制添加
 4. 提交后执行 `git show --stat HEAD`，确认文件数量符合预期
 
-## 5. 部署后端到端验证
+## 6. 部署后端到端验证
 
 每次推送到服务器后，三层验证缺一不可：
 
