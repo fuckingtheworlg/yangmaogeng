@@ -16,7 +16,10 @@ router.post('/', userAuth, async (req, res) => {
       if (f === 'type') return type
       if (f === 'user_id') return req.userId
       if (f === 'ship_images' || f === 'cert_images') return JSON.stringify(data[f] || [])
-      return data[f] !== undefined ? data[f] : null
+      const v = data[f]
+      if (v === undefined || v === null) return null
+      if (Array.isArray(v) || typeof v === 'object') return JSON.stringify(v)
+      return v
     })
     const sql = `INSERT INTO commissions (${fields.join(',')}) VALUES (${fields.map(() => '?').join(',')})`
     const [result] = await pool.query(sql, values)

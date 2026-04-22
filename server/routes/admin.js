@@ -7,6 +7,34 @@ const { adminAuth } = require('../middleware/auth')
 const { generateShipNo, generateCommissionCode, generateTransactionCode } = require('../utils/code')
 require('dotenv').config()
 
+/**
+ * 把单个字段值转为 SQL 可接受的值
+ * - undefined / null → null（SQL NULL，让 DEFAULT 或 NULL 生效）
+ * - 数组 / 普通对象 → JSON.stringify
+ * - 其他 → 原样
+ * 关键：先判断 null，避免 typeof null === 'object' 导致 JSON.stringify(null) === '"null"' 的坑
+ */
+function sqlValue(v) {
+  if (v === undefined || v === null) return null
+  if (Array.isArray(v)) return JSON.stringify(v)
+  if (typeof v === 'object') return JSON.stringify(v)
+  return v
+}
+
+/**
+ * 根据白名单从 data 取出要 UPDATE 的 set 子句和 values，null/undefined 视为不更新
+ */
+function buildUpdate(data, fields) {
+  const sets = []
+  const values = []
+  fields.forEach(f => {
+    if (data[f] === undefined || data[f] === null) return
+    sets.push(`${f} = ?`)
+    values.push(sqlValue(data[f]))
+  })
+  return { sets, values }
+}
+
 // 管理员登录
 router.post('/login', async (req, res) => {
   try {
@@ -66,7 +94,7 @@ router.post('/ships', adminAuth, async (req, res) => {
       data.ship_no = await generateShipNo(pool)
     }
     const fields = ['ship_no', 'ship_name', 'total_length', 'width', 'depth', 'ship_type', 'ship_condition', 'deadweight', 'gross_tonnage', 'net_tonnage', 'build_date', 'build_province', 'port_registry', 'engine_brand', 'engine_power', 'engine_count', 'water_type', 'price', 'base_price', 'images', 'certificates', 'contact_name', 'contact_phone', 'description', 'status', 'is_carousel']
-    const values = fields.map(f => data[f] !== undefined ? (typeof data[f] === 'object' ? JSON.stringify(data[f]) : data[f]) : null)
+    const values = fields.map(f => sqlValue(data[f]))
     const sql = `INSERT INTO ships (${fields.join(',')}) VALUES (${fields.map(() => '?').join(',')})`
     const [result] = await pool.query(sql, values)
     res.json({ code: 200, data: { id: result.insertId, ship_no: data.ship_no }, message: '新增成功' })
@@ -79,16 +107,8 @@ router.post('/ships', adminAuth, async (req, res) => {
 router.put('/ships/:id', adminAuth, async (req, res) => {
   try {
     const { id } = req.params
-    const data = req.body
     const fields = ['ship_no', 'ship_name', 'total_length', 'width', 'depth', 'ship_type', 'ship_condition', 'deadweight', 'gross_tonnage', 'net_tonnage', 'build_date', 'build_province', 'port_registry', 'engine_brand', 'engine_power', 'engine_count', 'water_type', 'price', 'base_price', 'images', 'certificates', 'contact_name', 'contact_phone', 'description', 'status', 'is_carousel']
-    const sets = []
-    const values = []
-    fields.forEach(f => {
-      if (data[f] !== undefined) {
-        sets.push(`${f} = ?`)
-        values.push(typeof data[f] === 'object' ? JSON.stringify(data[f]) : data[f])
-      }
-    })
+    const { sets, values } = buildUpdate(req.body, fields)
     if (sets.length === 0) return res.json({ code: 400, message: '无更新字段' })
     values.push(id)
     await pool.query(`UPDATE ships SET ${sets.join(',')} WHERE id = ?`, values)
@@ -213,7 +233,7 @@ router.post('/commissions', adminAuth, async (req, res) => {
       if (f === 'code') return code
       if (f === 'type') return type
       if (f === 'ship_images' || f === 'cert_images') return JSON.stringify(data[f] || [])
-      return data[f] !== undefined ? data[f] : null
+      return sqlValue(data[f])
     })
     const sql = `INSERT INTO commissions (${fields.join(',')}) VALUES (${fields.map(() => '?').join(',')})`
     const [result] = await pool.query(sql, values)
@@ -226,16 +246,8 @@ router.post('/commissions', adminAuth, async (req, res) => {
 
 router.put('/commissions/:id', adminAuth, async (req, res) => {
   try {
-    const data = req.body
     const fields = ['status', 'matched_ship_ids', 'contact_name', 'gender', 'phone', 'total_length', 'width', 'depth', 'deadweight', 'gross_tonnage', 'build_date', 'build_province', 'port_registry', 'water_type', 'ship_type', 'engine_brand', 'engine_power', 'engine_count', 'year_start', 'year_end', 'budget', 'price', 'ship_images', 'cert_images', 'remark']
-    const sets = []
-    const values = []
-    fields.forEach(f => {
-      if (data[f] !== undefined) {
-        sets.push(`${f} = ?`)
-        values.push(typeof data[f] === 'object' ? JSON.stringify(data[f]) : data[f])
-      }
-    })
+    const { sets, values } = buildUpdate(req.body, fields)
     if (sets.length === 0) return res.json({ code: 400, message: '无更新字段' })
     values.push(req.params.id)
     await pool.query(`UPDATE commissions SET ${sets.join(',')} WHERE id = ?`, values)
@@ -351,12 +363,7 @@ router.post('/transactions', adminAuth, async (req, res) => {
 router.put('/transactions/:id', adminAuth, async (req, res) => {
   try {
     const fields = ['price', 'buyer_name', 'buyer_phone', 'seller_name', 'seller_phone', 'remark', 'deal_date']
-    const data = req.body
-    const sets = []
-    const values = []
-    fields.forEach(f => {
-      if (data[f] !== undefined) { sets.push(`${f} = ?`); values.push(data[f]) }
-    })
+    const { sets, values } = buildUpdate(req.body, fields)
     if (sets.length === 0) return res.json({ code: 400, message: '无更新字段' })
     values.push(req.params.id)
     await pool.query(`UPDATE transactions SET ${sets.join(',')} WHERE id = ?`, values)
