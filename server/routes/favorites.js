@@ -15,6 +15,7 @@ router.get('/', userAuth, async (req, res) => {
     })
     res.json({ code: 200, data: { list: rows } })
   } catch (err) {
+    console.error(`[${req.method} ${req.originalUrl}] error:`, err)
     res.status(500).json({ code: 500, message: err.message })
   }
 })
@@ -26,6 +27,7 @@ router.post('/', userAuth, async (req, res) => {
     await pool.query('INSERT IGNORE INTO favorites (user_id, ship_id) VALUES (?, ?)', [req.userId, ship_id])
     res.json({ code: 200, message: '收藏成功' })
   } catch (err) {
+    console.error(`[${req.method} ${req.originalUrl}] error:`, err)
     res.status(500).json({ code: 500, message: err.message })
   }
 })
@@ -36,6 +38,7 @@ router.delete('/:shipId', userAuth, async (req, res) => {
     await pool.query('DELETE FROM favorites WHERE user_id = ? AND ship_id = ?', [req.userId, req.params.shipId])
     res.json({ code: 200, message: '取消收藏成功' })
   } catch (err) {
+    console.error(`[${req.method} ${req.originalUrl}] error:`, err)
     res.status(500).json({ code: 500, message: err.message })
   }
 })
@@ -46,6 +49,7 @@ router.get('/check/:shipId', userAuth, async (req, res) => {
     const [rows] = await pool.query('SELECT id FROM favorites WHERE user_id = ? AND ship_id = ?', [req.userId, req.params.shipId])
     res.json({ code: 200, data: { isFavorited: rows.length > 0 } })
   } catch (err) {
+    console.error(`[${req.method} ${req.originalUrl}] error:`, err)
     res.status(500).json({ code: 500, message: err.message })
   }
 })

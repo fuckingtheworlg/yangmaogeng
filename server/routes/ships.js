@@ -25,6 +25,7 @@ router.get('/', async (req, res) => {
 
     res.json({ code: 200, data: { list: rows } })
   } catch (err) {
+    console.error(`[${req.method} ${req.originalUrl}] error:`, err)
     res.status(500).json({ code: 500, message: err.message })
   }
 })
@@ -41,6 +42,7 @@ router.get('/:id', async (req, res) => {
     try { ship.certificates = JSON.parse(ship.certificates || '[]') } catch { ship.certificates = [] }
     res.json({ code: 200, data: ship })
   } catch (err) {
+    console.error(`[${req.method} ${req.originalUrl}] error:`, err)
     res.status(500).json({ code: 500, message: err.message })
   }
 })

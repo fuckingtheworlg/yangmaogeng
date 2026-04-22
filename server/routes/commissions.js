@@ -22,6 +22,7 @@ router.post('/', userAuth, async (req, res) => {
     const [result] = await pool.query(sql, values)
     res.json({ code: 200, data: { id: result.insertId, code }, message: '委托提交成功' })
   } catch (err) {
+    console.error(`[${req.method} ${req.originalUrl}] error:`, err)
     res.status(500).json({ code: 500, message: err.message })
   }
 })
@@ -35,6 +36,7 @@ router.get('/', userAuth, async (req, res) => {
     )
     res.json({ code: 200, data: { list: rows } })
   } catch (err) {
+    console.error(`[${req.method} ${req.originalUrl}] error:`, err)
     res.status(500).json({ code: 500, message: err.message })
   }
 })

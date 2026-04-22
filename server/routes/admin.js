@@ -26,6 +26,7 @@ router.post('/login', async (req, res) => {
     const token = jwt.sign({ id: admin.id, role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '7d' })
     res.json({ code: 200, data: { token, username: admin.username } })
   } catch (err) {
+    console.error(`[${req.method} ${req.originalUrl}] error:`, err)
     res.status(500).json({ code: 500, message: err.message })
   }
 })
@@ -53,6 +54,7 @@ router.get('/ships', adminAuth, async (req, res) => {
 
     res.json({ code: 200, data: { list: rows, total: countRows[0].total } })
   } catch (err) {
+    console.error(`[${req.method} ${req.originalUrl}] error:`, err)
     res.status(500).json({ code: 500, message: err.message })
   }
 })
@@ -69,6 +71,7 @@ router.post('/ships', adminAuth, async (req, res) => {
     const [result] = await pool.query(sql, values)
     res.json({ code: 200, data: { id: result.insertId, ship_no: data.ship_no }, message: '新增成功' })
   } catch (err) {
+    console.error(`[${req.method} ${req.originalUrl}] error:`, err)
     res.status(500).json({ code: 500, message: err.message })
   }
 })
@@ -91,6 +94,7 @@ router.put('/ships/:id', adminAuth, async (req, res) => {
     await pool.query(`UPDATE ships SET ${sets.join(',')} WHERE id = ?`, values)
     res.json({ code: 200, message: '更新成功' })
   } catch (err) {
+    console.error(`[${req.method} ${req.originalUrl}] error:`, err)
     res.status(500).json({ code: 500, message: err.message })
   }
 })
@@ -100,6 +104,7 @@ router.delete('/ships/:id', adminAuth, async (req, res) => {
     await pool.query('DELETE FROM ships WHERE id = ?', [req.params.id])
     res.json({ code: 200, message: '删除成功' })
   } catch (err) {
+    console.error(`[${req.method} ${req.originalUrl}] error:`, err)
     res.status(500).json({ code: 500, message: err.message })
   }
 })
@@ -124,6 +129,7 @@ router.post('/ships/:id/finalize', adminAuth, async (req, res) => {
     }
     res.json({ code: 200, data: { id: result.insertId, code }, message: '成交成功' })
   } catch (err) {
+    console.error(`[${req.method} ${req.originalUrl}] error:`, err)
     res.status(500).json({ code: 500, message: err.message })
   }
 })
@@ -148,6 +154,7 @@ router.get('/users', adminAuth, async (req, res) => {
     const [rows] = await pool.query(sql, params)
     res.json({ code: 200, data: { list: rows } })
   } catch (err) {
+    console.error(`[${req.method} ${req.originalUrl}] error:`, err)
     res.status(500).json({ code: 500, message: err.message })
   }
 })
@@ -158,6 +165,7 @@ router.put('/users/:id', adminAuth, async (req, res) => {
     await pool.query('UPDATE users SET nickname = ?, phone = ? WHERE id = ?', [nickname, phone, req.params.id])
     res.json({ code: 200, message: '更新成功' })
   } catch (err) {
+    console.error(`[${req.method} ${req.originalUrl}] error:`, err)
     res.status(500).json({ code: 500, message: err.message })
   }
 })
@@ -167,6 +175,7 @@ router.delete('/users/:id', adminAuth, async (req, res) => {
     await pool.query('DELETE FROM users WHERE id = ?', [req.params.id])
     res.json({ code: 200, message: '删除成功' })
   } catch (err) {
+    console.error(`[${req.method} ${req.originalUrl}] error:`, err)
     res.status(500).json({ code: 500, message: err.message })
   }
 })
@@ -188,6 +197,7 @@ router.get('/commissions', adminAuth, async (req, res) => {
     const [rows] = await pool.query(sql, params)
     res.json({ code: 200, data: { list: rows } })
   } catch (err) {
+    console.error(`[${req.method} ${req.originalUrl}] error:`, err)
     res.status(500).json({ code: 500, message: err.message })
   }
 })
@@ -209,6 +219,7 @@ router.post('/commissions', adminAuth, async (req, res) => {
     const [result] = await pool.query(sql, values)
     res.json({ code: 200, data: { id: result.insertId, code }, message: '新增成功' })
   } catch (err) {
+    console.error(`[${req.method} ${req.originalUrl}] error:`, err)
     res.status(500).json({ code: 500, message: err.message })
   }
 })
@@ -230,6 +241,7 @@ router.put('/commissions/:id', adminAuth, async (req, res) => {
     await pool.query(`UPDATE commissions SET ${sets.join(',')} WHERE id = ?`, values)
     res.json({ code: 200, message: '更新成功' })
   } catch (err) {
+    console.error(`[${req.method} ${req.originalUrl}] error:`, err)
     res.status(500).json({ code: 500, message: err.message })
   }
 })
@@ -240,6 +252,7 @@ router.delete('/commissions/:id', adminAuth, async (req, res) => {
     await pool.query('DELETE FROM commissions WHERE id = ?', [req.params.id])
     res.json({ code: 200, message: '删除成功' })
   } catch (err) {
+    console.error(`[${req.method} ${req.originalUrl}] error:`, err)
     res.status(500).json({ code: 500, message: err.message })
   }
 })
@@ -286,6 +299,7 @@ router.post('/commissions/:id/import-ship', adminAuth, async (req, res) => {
     await pool.query('UPDATE commissions SET status = 1 WHERE id = ?', [commissionId])
     res.json({ code: 200, data: { ship_id: result.insertId, ship_no: shipNo }, message: '已导入船舶库' })
   } catch (err) {
+    console.error(`[${req.method} ${req.originalUrl}] error:`, err)
     res.status(500).json({ code: 500, message: err.message })
   }
 })
@@ -310,6 +324,7 @@ router.get('/transactions', adminAuth, async (req, res) => {
     const [rows] = await pool.query(sql, params)
     res.json({ code: 200, data: { list: rows } })
   } catch (err) {
+    console.error(`[${req.method} ${req.originalUrl}] error:`, err)
     res.status(500).json({ code: 500, message: err.message })
   }
 })
@@ -328,6 +343,7 @@ router.post('/transactions', adminAuth, async (req, res) => {
     await pool.query('UPDATE ships SET status = 2 WHERE id = ?', [ship_id])
     res.json({ code: 200, data: { id: result.insertId, code }, message: '新增成功' })
   } catch (err) {
+    console.error(`[${req.method} ${req.originalUrl}] error:`, err)
     res.status(500).json({ code: 500, message: err.message })
   }
 })
@@ -346,6 +362,7 @@ router.put('/transactions/:id', adminAuth, async (req, res) => {
     await pool.query(`UPDATE transactions SET ${sets.join(',')} WHERE id = ?`, values)
     res.json({ code: 200, message: '更新成功' })
   } catch (err) {
+    console.error(`[${req.method} ${req.originalUrl}] error:`, err)
     res.status(500).json({ code: 500, message: err.message })
   }
 })
@@ -355,6 +372,7 @@ router.delete('/transactions/:id', adminAuth, async (req, res) => {
     await pool.query('DELETE FROM transactions WHERE id = ?', [req.params.id])
     res.json({ code: 200, message: '删除成功' })
   } catch (err) {
+    console.error(`[${req.method} ${req.originalUrl}] error:`, err)
     res.status(500).json({ code: 500, message: err.message })
   }
 })
@@ -373,6 +391,7 @@ router.get('/stats', adminAuth, async (req, res) => {
       }
     })
   } catch (err) {
+    console.error(`[${req.method} ${req.originalUrl}] error:`, err)
     res.status(500).json({ code: 500, message: err.message })
   }
 })
