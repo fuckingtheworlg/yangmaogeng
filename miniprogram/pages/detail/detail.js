@@ -26,14 +26,21 @@ Page({
 
   formatShip(ship) {
     const serverUrl = app.globalData.serverUrl
-    if (ship.images && ship.images.length > 0) {
-      ship.images = ship.images.map(img => {
+    if (typeof ship.images === 'string') {
+      try { ship.images = JSON.parse(ship.images) } catch { ship.images = [] }
+    }
+    if (Array.isArray(ship.images) && ship.images.length > 0) {
+      ship.images = ship.images.filter(Boolean).map(img => {
         if (img && img.startsWith('/uploads')) return serverUrl + img
         return img
       })
     } else {
       ship.images = []
     }
+    if (typeof ship.certificates === 'string') {
+      try { ship.certificates = JSON.parse(ship.certificates) } catch { ship.certificates = [] }
+    }
+    if (!Array.isArray(ship.certificates)) ship.certificates = []
     if (ship.price) ship.price = parseFloat(ship.price)
     if (ship.total_length) ship.total_length = parseFloat(ship.total_length)
     if (ship.width) ship.width = parseFloat(ship.width)

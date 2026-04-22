@@ -60,7 +60,7 @@
         </view>
         <view class="grid-item">
           <text class="grid-label">载重吨（吨）</text>
-          <input class="grid-input" placeholder="0" type="number" value="{{form.deadweight}}" bindinput="onInput" data-field="deadweight" />
+          <input class="grid-input" placeholder="长×宽×深×0.7 自动" type="number" value="{{form.deadweight}}" bindinput="onInput" data-field="deadweight" />
         </view>
       </view>
       <view class="form-row">

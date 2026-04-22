@@ -58,12 +58,17 @@
               <el-tag :type="statusMap[row.status]?.type" size="small">{{ statusMap[row.status]?.label }}</el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="280" fixed="right">
+          <el-table-column label="操作" width="260" fixed="right">
             <template #default="{ row }">
+              <el-button
+                :type="row.status === 1 ? 'success' : 'primary'"
+                size="small"
+                plain
+                @click="toggleAccept(row)"
+                :disabled="row.status === 2"
+              >{{ row.status === 1 ? '已接受' : '未接受' }}</el-button>
               <el-button type="primary" text size="small" @click="openEdit(row)">编辑</el-button>
-              <el-button type="success" text size="small" @click="setStatus(row, 1)" :disabled="row.status !== 0">达成</el-button>
-              <el-button type="warning" text size="small" @click="setStatus(row, 3)" :disabled="row.status !== 0">拒绝</el-button>
-              <el-button type="info" text size="small" @click="setStatus(row, 4)" :disabled="row.status === 2">失效</el-button>
+              <el-button type="info" text size="small" @click="setStatus(row, 4)" :disabled="row.status === 2 || row.status === 4">失效</el-button>
               <el-button type="danger" text size="small" @click="handleDelete(row)">删除</el-button>
             </template>
           </el-table-column>
@@ -125,12 +130,18 @@
               <el-tag :type="statusMap[row.status]?.type" size="small">{{ statusMap[row.status]?.label }}</el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="320" fixed="right">
+          <el-table-column label="操作" width="360" fixed="right">
             <template #default="{ row }">
+              <el-button
+                :type="row.status === 1 ? 'success' : 'primary'"
+                size="small"
+                plain
+                @click="toggleAccept(row)"
+                :disabled="row.status === 2"
+              >{{ row.status === 1 ? '已接受' : '未接受' }}</el-button>
               <el-button type="primary" text size="small" @click="openEdit(row)">编辑</el-button>
-              <el-button type="success" text size="small" @click="openImport(row)" :disabled="row.status !== 0">导入船舶库</el-button>
-              <el-button type="warning" text size="small" @click="setStatus(row, 3)" :disabled="row.status !== 0">拒绝</el-button>
-              <el-button type="info" text size="small" @click="setStatus(row, 4)" :disabled="row.status === 2">失效</el-button>
+              <el-button type="success" text size="small" @click="openImport(row)" :disabled="row.status === 2 || row.status === 4">导入数据库</el-button>
+              <el-button type="info" text size="small" @click="setStatus(row, 4)" :disabled="row.status === 2 || row.status === 4">失效</el-button>
               <el-button type="danger" text size="small" @click="handleDelete(row)">删除</el-button>
             </template>
           </el-table-column>
@@ -156,12 +167,17 @@
           <el-col :span="12"><el-form-item label="电话"><el-input v-model="editForm.phone" /></el-form-item></el-col>
         </el-row>
         <el-row :gutter="16">
-          <el-col :span="8"><el-form-item label="总长(米)"><el-input-number v-model="editForm.total_length" :min="0" style="width:100%" /></el-form-item></el-col>
-          <el-col :span="8"><el-form-item label="型宽(米)"><el-input-number v-model="editForm.width" :min="0" style="width:100%" /></el-form-item></el-col>
-          <el-col :span="8"><el-form-item label="型深(米)"><el-input-number v-model="editForm.depth" :min="0" style="width:100%" /></el-form-item></el-col>
+          <el-col :span="8"><el-form-item label="总长(米)"><el-input-number v-model="editForm.total_length" :min="0" :precision="2" style="width:100%" @change="onEditDimChange" /></el-form-item></el-col>
+          <el-col :span="8"><el-form-item label="型宽(米)"><el-input-number v-model="editForm.width" :min="0" :precision="2" style="width:100%" @change="onEditDimChange" /></el-form-item></el-col>
+          <el-col :span="8"><el-form-item label="型深(米)"><el-input-number v-model="editForm.depth" :min="0" :precision="2" style="width:100%" @change="onEditDimChange" /></el-form-item></el-col>
         </el-row>
         <el-row :gutter="16">
-          <el-col :span="12"><el-form-item label="载重吨"><el-input-number v-model="editForm.deadweight" :min="0" style="width:100%" /></el-form-item></el-col>
+          <el-col :span="12">
+            <el-form-item label="载重吨">
+              <el-input-number v-model="editForm.deadweight" :min="0" style="width:100%" />
+              <div class="tip" v-if="editForm && editForm.type === 'sell'">= 长×宽×深×0.7 自动估算</div>
+            </el-form-item>
+          </el-col>
           <el-col :span="12"><el-form-item label="总吨"><el-input-number v-model="editForm.gross_tonnage" :min="0" style="width:100%" /></el-form-item></el-col>
         </el-row>
         <el-row :gutter="16">
@@ -262,12 +278,17 @@
           <el-col :span="12"><el-form-item label="船号"><el-input v-model="importForm.ship_name" placeholder="如 江海通达01" /></el-form-item></el-col>
         </el-row>
         <el-row :gutter="16">
-          <el-col :span="8"><el-form-item label="总长(米)"><el-input-number v-model="importForm.total_length" :min="0" style="width:100%" /></el-form-item></el-col>
-          <el-col :span="8"><el-form-item label="型宽(米)"><el-input-number v-model="importForm.width" :min="0" style="width:100%" /></el-form-item></el-col>
-          <el-col :span="8"><el-form-item label="型深(米)"><el-input-number v-model="importForm.depth" :min="0" style="width:100%" /></el-form-item></el-col>
+          <el-col :span="8"><el-form-item label="总长(米)"><el-input-number v-model="importForm.total_length" :min="0" :precision="2" style="width:100%" @change="onImportDimChange" /></el-form-item></el-col>
+          <el-col :span="8"><el-form-item label="型宽(米)"><el-input-number v-model="importForm.width" :min="0" :precision="2" style="width:100%" @change="onImportDimChange" /></el-form-item></el-col>
+          <el-col :span="8"><el-form-item label="型深(米)"><el-input-number v-model="importForm.depth" :min="0" :precision="2" style="width:100%" @change="onImportDimChange" /></el-form-item></el-col>
         </el-row>
         <el-row :gutter="16">
-          <el-col :span="8"><el-form-item label="载重吨"><el-input-number v-model="importForm.deadweight" :min="0" style="width:100%" /></el-form-item></el-col>
+          <el-col :span="8">
+            <el-form-item label="载重吨">
+              <el-input-number v-model="importForm.deadweight" :min="0" style="width:100%" @change="onImportDwtChange" />
+              <div class="tip">= 长×宽×深×0.7</div>
+            </el-form-item>
+          </el-col>
           <el-col :span="8"><el-form-item label="总吨"><el-input-number v-model="importForm.gross_tonnage" :min="0" style="width:100%" /></el-form-item></el-col>
           <el-col :span="8"><el-form-item label="净吨位"><el-input-number v-model="importForm.net_tonnage" :min="0" style="width:100%" /></el-form-item></el-col>
         </el-row>
@@ -293,8 +314,17 @@
           </el-col>
         </el-row>
         <el-row :gutter="16">
-          <el-col :span="12"><el-form-item label="起价(万元)"><el-input-number v-model="importForm.base_price" :min="0" style="width:100%" /></el-form-item></el-col>
-          <el-col :span="12"><el-form-item label="售价(万元)"><el-input-number v-model="importForm.price" :min="0" style="width:100%" /></el-form-item></el-col>
+          <el-col :span="12">
+            <el-form-item label="单价(元/吨)">
+              <el-input-number v-model="importForm.base_price" :min="0" :precision="2" :step="50" style="width:100%" @change="onImportPriceChange" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="总价(万元)">
+              <el-input-number v-model="importForm.price" :min="0" :precision="2" style="width:100%" />
+              <div class="tip">= 单价×载重吨÷10000</div>
+            </el-form-item>
+          </el-col>
         </el-row>
         <el-row :gutter="16">
           <el-col :span="12"><el-form-item label="联系人"><el-input v-model="importForm.contact_name" /></el-form-item></el-col>
@@ -346,7 +376,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Search, Plus } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getCommissions, addCommission, updateCommission, importCommissionToShip, getShips } from '../../api/admin'
+import { getCommissions, addCommission, updateCommission, deleteCommission, importCommissionToShip, getShips } from '../../api/admin'
 import ImageUploader from '../../components/ImageUploader.vue'
 
 const API_BASE = 'http://47.114.89.50'
@@ -429,16 +459,31 @@ async function setStatus(row, status) {
   }
 }
 
+async function toggleAccept(row) {
+  const target = row.status === 1 ? 0 : 1
+  try {
+    const res = await updateCommission(row.id, { status: target })
+    if (res.code === 200) {
+      ElMessage.success(target === 1 ? '已接受' : '已取消接受')
+      fetchData()
+    }
+  } catch (e) {
+    ElMessage.error('操作失败')
+  }
+}
+
 function handleDelete(row) {
-  ElMessageBox.confirm('确定标记为已失效？', '提示', { type: 'warning' }).then(async () => {
+  ElMessageBox.confirm('确定永久删除该委托？删除后不可恢复', '提示', { type: 'warning' }).then(async () => {
     try {
-      const res = await updateCommission(row.id, { status: 4 })
-      if (res.code === 200) {
-        ElMessage.success('已标记为失效')
+      const res = await deleteCommission(row.id)
+      if (res && res.code === 200) {
+        ElMessage.success('已删除')
         fetchData()
+      } else {
+        ElMessage.error((res && res.message) || '删除失败')
       }
     } catch (e) {
-      ElMessage.error('操作失败')
+      ElMessage.error('删除失败')
     }
   }).catch(() => {})
 }
@@ -575,6 +620,36 @@ function openImport(row) {
   importVisible.value = true
 }
 
+function onEditDimChange() {
+  if (!editForm.value || editForm.value.type !== 'sell') return
+  const L = parseFloat(editForm.value.total_length) || 0
+  const W = parseFloat(editForm.value.width) || 0
+  const D = parseFloat(editForm.value.depth) || 0
+  if (L > 0 && W > 0 && D > 0) {
+    editForm.value.deadweight = Math.round(L * W * D * 0.7)
+  }
+}
+
+function onImportDimChange() {
+  const L = parseFloat(importForm.value?.total_length) || 0
+  const W = parseFloat(importForm.value?.width) || 0
+  const D = parseFloat(importForm.value?.depth) || 0
+  if (L > 0 && W > 0 && D > 0) {
+    importForm.value.deadweight = Math.round(L * W * D * 0.7)
+    recalcImportPrice()
+  }
+}
+function onImportDwtChange() { recalcImportPrice() }
+function onImportPriceChange() { recalcImportPrice() }
+function recalcImportPrice() {
+  if (!importForm.value) return
+  const unit = parseFloat(importForm.value.base_price) || 0
+  const dwt = parseFloat(importForm.value.deadweight) || 0
+  if (unit > 0 && dwt > 0) {
+    importForm.value.price = +((unit * dwt) / 10000).toFixed(2)
+  }
+}
+
 async function handleImport() {
   saving.value = true
   try {
@@ -606,5 +681,11 @@ onMounted(() => fetchData())
   padding: 16px;
   border-radius: 8px;
   flex-wrap: wrap;
+}
+.tip {
+  font-size: 12px;
+  color: #aaa;
+  line-height: 1.4;
+  margin-top: 4px;
 }
 </style>

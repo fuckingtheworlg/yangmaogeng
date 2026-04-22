@@ -40,8 +40,12 @@ Page({
 
   formatShip(ship) {
     const serverUrl = app.globalData.serverUrl
-    if (ship.images && ship.images.length > 0) {
-      ship.images = ship.images.map(img => {
+    // 兼容后端偶发返回字符串的情况
+    if (typeof ship.images === 'string') {
+      try { ship.images = JSON.parse(ship.images) } catch { ship.images = [] }
+    }
+    if (Array.isArray(ship.images) && ship.images.length > 0) {
+      ship.images = ship.images.filter(Boolean).map(img => {
         if (img && img.startsWith('/uploads')) return serverUrl + img
         return img
       })

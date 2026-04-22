@@ -45,6 +45,20 @@ Page({
   onInput(e) {
     const field = e.currentTarget.dataset.field
     this.setData({ [`form.${field}`]: e.detail.value })
+    if (['total_length', 'width', 'depth'].includes(field)) {
+      this.recalcDeadweight()
+    }
+  },
+
+  recalcDeadweight() {
+    const { total_length, width, depth } = this.data.form
+    const L = parseFloat(total_length) || 0
+    const W = parseFloat(width) || 0
+    const D = parseFloat(depth) || 0
+    if (L > 0 && W > 0 && D > 0) {
+      const dwt = Math.round(L * W * D * 0.7)
+      this.setData({ 'form.deadweight': String(dwt) })
+    }
   },
 
   setGender(e) {

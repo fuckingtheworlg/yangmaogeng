@@ -200,12 +200,17 @@
           </el-col>
         </el-row>
         <el-row :gutter="16">
-          <el-col :span="8"><el-form-item label="总长(米)"><el-input-number v-model="shipForm.total_length" :min="0" style="width:100%" /></el-form-item></el-col>
-          <el-col :span="8"><el-form-item label="型宽(米)"><el-input-number v-model="shipForm.width" :min="0" style="width:100%" /></el-form-item></el-col>
-          <el-col :span="8"><el-form-item label="型深(米)"><el-input-number v-model="shipForm.depth" :min="0" style="width:100%" /></el-form-item></el-col>
+          <el-col :span="8"><el-form-item label="总长(米)"><el-input-number v-model="shipForm.total_length" :min="0" :precision="2" style="width:100%" @change="onDimChange" /></el-form-item></el-col>
+          <el-col :span="8"><el-form-item label="型宽(米)"><el-input-number v-model="shipForm.width" :min="0" :precision="2" style="width:100%" @change="onDimChange" /></el-form-item></el-col>
+          <el-col :span="8"><el-form-item label="型深(米)"><el-input-number v-model="shipForm.depth" :min="0" :precision="2" style="width:100%" @change="onDimChange" /></el-form-item></el-col>
         </el-row>
         <el-row :gutter="16">
-          <el-col :span="8"><el-form-item label="载重吨"><el-input-number v-model="shipForm.deadweight" :min="0" style="width:100%" /></el-form-item></el-col>
+          <el-col :span="8">
+            <el-form-item label="载重吨">
+              <el-input-number v-model="shipForm.deadweight" :min="0" style="width:100%" @change="onDeadweightChange" />
+              <div class="tip">= 长×宽×深×0.7 自动估算，可手动调整</div>
+            </el-form-item>
+          </el-col>
           <el-col :span="8"><el-form-item label="总吨"><el-input-number v-model="shipForm.gross_tonnage" :min="0" style="width:100%" /></el-form-item></el-col>
           <el-col :span="8"><el-form-item label="净吨"><el-input-number v-model="shipForm.net_tonnage" :min="0" style="width:100%" /></el-form-item></el-col>
         </el-row>
@@ -231,8 +236,18 @@
           <el-col :span="8"><el-form-item label="主机数量(台)"><el-input-number v-model="shipForm.engine_count" :min="1" style="width:100%" /></el-form-item></el-col>
         </el-row>
         <el-row :gutter="16">
-          <el-col :span="12"><el-form-item label="起价(万元)"><el-input-number v-model="shipForm.base_price" :min="0" style="width:100%" /></el-form-item></el-col>
-          <el-col :span="12"><el-form-item label="售价(万元)"><el-input-number v-model="shipForm.price" :min="0" style="width:100%" /></el-form-item></el-col>
+          <el-col :span="12">
+            <el-form-item label="单价(元/吨)">
+              <el-input-number v-model="shipForm.base_price" :min="0" :precision="2" :step="50" style="width:100%" @change="onPriceChange" />
+              <div class="tip">元 / 载重吨</div>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="总价(万元)">
+              <el-input-number v-model="shipForm.price" :min="0" :precision="2" style="width:100%" />
+              <div class="tip">= 单价 × 载重吨 ÷ 10000，可手动覆盖</div>
+            </el-form-item>
+          </el-col>
         </el-row>
         <el-row :gutter="16">
           <el-col :span="12"><el-form-item label="联系人"><el-input v-model="shipForm.contact_name" /></el-form-item></el-col>
@@ -420,6 +435,32 @@ function handleRowClick(row) {
   detailVisible.value = true
 }
 
+function onDimChange() {
+  const L = parseFloat(shipForm.value.total_length) || 0
+  const W = parseFloat(shipForm.value.width) || 0
+  const D = parseFloat(shipForm.value.depth) || 0
+  if (L > 0 && W > 0 && D > 0) {
+    shipForm.value.deadweight = Math.round(L * W * D * 0.7)
+    recalcPrice()
+  }
+}
+
+function onDeadweightChange() {
+  recalcPrice()
+}
+
+function onPriceChange() {
+  recalcPrice()
+}
+
+function recalcPrice() {
+  const unit = parseFloat(shipForm.value.base_price) || 0
+  const dwt = parseFloat(shipForm.value.deadweight) || 0
+  if (unit > 0 && dwt > 0) {
+    shipForm.value.price = +((unit * dwt) / 10000).toFixed(2)
+  }
+}
+
 function handleAdd() {
   isEdit.value = false
   shipForm.value = { ...emptyForm, images: [], certificates: [] }
@@ -512,5 +553,11 @@ onMounted(() => fetchShips())
 }
 .dl {
   color: #999;
+}
+.tip {
+  font-size: 12px;
+  color: #aaa;
+  line-height: 1.4;
+  margin-top: 4px;
 }
 </style>

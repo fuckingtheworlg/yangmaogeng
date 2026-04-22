@@ -2,7 +2,7 @@
   "miniprogramRoot": "./",
   "projectname": "yaomaogeng",
   "description": "羊毛梗船舶服务中心信息发布平台",
-  "appid": "wxf5e2b8db4b6e7e30",
+  "appid": "wx88fb9be41929b344",
   "setting": {
     "urlCheck": false,
     "es6": true,
@@ -55,5 +55,6 @@
     "ignore": [],
     "include": []
   },
-  "editorSetting": {}
+  "editorSetting": {},
+  "libVersion": "3.15.2"
 }

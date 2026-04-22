@@ -235,6 +235,15 @@ router.put('/commissions/:id', adminAuth, async (req, res) => {
 })
 
 // 出售委托 → 导入船舶库
+router.delete('/commissions/:id', adminAuth, async (req, res) => {
+  try {
+    await pool.query('DELETE FROM commissions WHERE id = ?', [req.params.id])
+    res.json({ code: 200, message: '删除成功' })
+  } catch (err) {
+    res.status(500).json({ code: 500, message: err.message })
+  }
+})
+
 router.post('/commissions/:id/import-ship', adminAuth, async (req, res) => {
   try {
     const commissionId = Number(req.params.id)
