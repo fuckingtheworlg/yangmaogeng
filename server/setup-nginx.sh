@@ -68,8 +68,7 @@ server {
 
 # HTTPS 主站
 server {
-    listen 443 ssl;
-    http2 on;
+    listen 443 ssl http2;
     server_name $SERVER_NAME;
 
     ssl_certificate     $SSL_CERT;

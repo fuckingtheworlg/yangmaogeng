@@ -45,21 +45,52 @@ else
     fi
 fi
 
-# ---- 2. 预检：Nginx 已跑，域名能从外网 80 访问 ----
+# ---- 2. 预检：Nginx 已跑，DNS 已解析，域名能从外网 80 访问 ----
 echo ""
-echo "[2/5] 预检 HTTP 可达..."
+echo "[2/5] 预检..."
 if ! systemctl is-active nginx &> /dev/null; then
     echo "  [错误] Nginx 未运行，请先跑 bash setup-nginx.sh"
     exit 1
 fi
-# 让 nginx 能对 /.well-known/acme-challenge/ 返回 webroot 静态文件
-# 当前 setup-nginx.sh 的 HTTP 模式下 root 就是 $WEBROOT，webroot 模式能直接跑
 if [ ! -d "$WEBROOT" ]; then
     echo "  [错误] webroot 不存在: $WEBROOT"
     echo "         请确认 admin/dist/ 已 pull 到服务器"
     exit 1
 fi
 mkdir -p "$WEBROOT/.well-known/acme-challenge"
+
+# DNS 解析检查（防止 Let's Encrypt 报 no valid A records）
+echo "  查询 $DOMAIN 的 A 记录..."
+command -v dig &> /dev/null || { \
+    (command -v dnf &> /dev/null && dnf install -y bind-utils) || \
+    (command -v yum &> /dev/null && yum install -y bind-utils) || \
+    (command -v apt &> /dev/null && apt install -y dnsutils) || true; }
+
+RESOLVED_IP=$(dig +short "$DOMAIN" A @223.5.5.5 2>/dev/null | head -n 1)
+PUBLIC_IP=$(curl -s --max-time 5 ifconfig.me 2>/dev/null || curl -s --max-time 5 ipinfo.io/ip 2>/dev/null)
+
+if [ -z "$RESOLVED_IP" ]; then
+    echo ""
+    echo "  [错误] 域名 $DOMAIN 没有 A 记录（DNS 未解析到任何 IP）"
+    echo ""
+    echo "  ICP 备案通过 ≠ DNS 解析完成，需要额外在阿里云域名控制台加 A 记录："
+    echo "    1) 打开 https://dns.console.aliyun.com/"
+    echo "    2) 找到 $DOMAIN → 解析设置 → 添加记录"
+    echo "       记录类型=A, 主机记录=@, 记录值=${PUBLIC_IP:-<本机公网 IP>}, TTL=600"
+    echo "    3) 等 1~3 分钟生效，然后重跑本脚本"
+    exit 1
+fi
+
+echo "  $DOMAIN → $RESOLVED_IP"
+echo "  本机公网 IP → ${PUBLIC_IP:-未知}"
+
+if [ -n "$PUBLIC_IP" ] && [ "$RESOLVED_IP" != "$PUBLIC_IP" ]; then
+    echo ""
+    echo "  [警告] 域名解析 IP ($RESOLVED_IP) 与本机公网 IP ($PUBLIC_IP) 不一致"
+    echo "         继续申请会失败（Let's Encrypt 会打到 $RESOLVED_IP，不是本机）"
+    echo "         请在阿里云 DNS 控制台把 A 记录改成 $PUBLIC_IP"
+    exit 1
+fi
 
 # ---- 3. 申请证书（webroot 模式，Nginx 不需停） ----
 echo ""

@@ -50,6 +50,25 @@
 
 ## 踩坑记录
 
+### ⚠️ Nginx 1.20 不认识 `http2 on;` 新语法（2026-04-23）
+
+- **现象**：`setup-ssl-certbot.sh` 跑到第 5 步 `nginx -t` 报 `unknown directive "http2" in /etc/nginx/conf.d/yaomaogeng.conf`
+- **根因**：Nginx 从 1.25.1 起把 HTTP/2 启用方式从 `listen 443 ssl http2;` 改成独立指令 `http2 on;`。阿里云 AlibabaCloud Linux 官方仓库装的是 `nginx-1:1.20.1-1.0.7.al8`（2021 年版本），只认老语法。
+- **修复位置**：`server/setup-nginx.sh` HTTPS server 块——改回 `listen 443 ssl http2;` 单行写法。新版 Nginx (1.25+) 对此只会有 deprecated warning，不影响使用，兼容性最好。
+- **预防**：写 Nginx 脚本时，凡是 1.25+ 引入的新语法（`http2 on;`、`quic`、`ssl_preread_protocols` 等）都要考虑宿主 Nginx 版本。`nginx -v` 是第一步。
+
+### ⚠️ ICP 备案通过 ≠ DNS 解析完成（2026-04-23）
+
+- **现象**：备案通过后直接跑 `setup-ssl-certbot.sh`，Let's Encrypt 报 `Detail: no valid A records found for yangmaogeng.top`
+- **根因**：ICP 备案和 DNS 解析是两个独立的阿里云产品/控制台：
+  - ICP 备案 (<https://beian.aliyun.com>)——工信部审核域名合法性
+  - 域名 DNS 解析 (<https://dns.console.aliyun.com>)——域名 → IP 映射，**需要手动加 A 记录**
+  - 备案通过**只证明域名能用**，不代表"用户输入这个域名能访问到我的服务器"
+- **修复位置**：
+  1. 阿里云 DNS 控制台 → `yangmaogeng.top` → 解析设置 → 添加 A 记录（@ → ECS 公网 IP）
+  2. `server/setup-ssl-certbot.sh` 第 2 步新增 DNS 预检（`dig` 拿到解析 IP，对比本机 `ifconfig.me` 的公网 IP），不一致直接 exit，避免浪费 Let's Encrypt 的 rate limit
+- **预防**：任何"域名 → 服务器"类需求的最小检查清单——`dig +short <域名> @223.5.5.5` 必须返回**服务器的公网 IP**，否则后续一切都不用干。
+
 ### ⚠️ 小程序合法域名是 HTTPS，服务器必须先有 SSL 证书再切代码（2026-04-23）
 
 - **现象**：域名 `yangmaogeng.top` 备案通过，小程序后台配了 `https://yangmaogeng.top` 为 request 合法域名。如果直接把 `miniprogram/app.js` 的 `baseUrl` 从 `http://47.114.89.50` 改成 `https://yangmaogeng.top`，服务器没证书的话小程序会全部 `request:fail`。
