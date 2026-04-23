@@ -144,55 +144,20 @@ mysql -u root -p yaomaogeng < server/config/migration-v4.sql  # 迁移
 
 ---
 
-## 6. 本项目特有的血泪教训（必读）
+## 6. 本项目特有的血泪教训（导览）
 
-完整版见 `.cursor/rules/dev-workflow.mdc`，这里只列最重要的：
+详细内容在 `.cursor/rules/dev-workflow.mdc`，以下只列标题，便于 AI 会话起手快速扫描：
 
-### 6.1 改后端 API 必须搜全前端残留的 mock
+| # | 场景 | 一句话 |
+|---|---|---|
+| 1 | 后端 API 变更 | `bash scripts/lint-residuals.sh` 扫 mock / IP 残留；两端都要查 |
+| 2 | 微信小程序平台 API | 先查「用户隐私保护指引」勾选 + `__usePrivacyCheck__`，禁止用 text 替换 nickname 绕过 |
+| 3 | 写数据库 | `typeof null === 'object'`，序列化前先排 null；migration 后必抽样旧数据 |
+| 4 | 管理后台 dist/ | 白名单 `!admin/dist/`，`npm run build` 后必 `git status` 确认变更 |
+| 5 | 部署后验证 | API 层 / 管理后台 / 小程序端三层一致才算完成；跑 `test-scripts/run-all-tests.sh` |
+| 6 | 模块完成 | 更新 `docs/progress/<模块>.md`（模块映射表见 dev-workflow.mdc 第 6 节） |
 
-```bash
-rg "mock" --type vue --type js -l
-```
-
-小程序端和管理后台**两端都要**检查，不能只改一端。
-
-### 6.2 数据库迁移后必须测历史数据
-
-`ALTER TABLE ADD COLUMN` 之后，旧行的新字段可能是 NULL（即使列带 DEFAULT 0）。
-必须抽样一条迁移前就存在的旧记录，走完整"读取 → 编辑 → 保存"流程。
-
-### 6.3 JS null 陷阱
-
-`typeof null === 'object'`。所有"是对象就 JSON.stringify"的判断必须**先排 null**。
-
-### 6.4 管理后台 dist/ 必须提交到 git
-
-`.gitignore` 里有 `!admin/dist/` 白名单。构建后：
-
-```bash
-cd admin && npm run build
-git status                    # 确认 dist/ 变更在列表里
-git add admin/dist
-git show --stat HEAD          # 提交后验证文件数量
-```
-
-### 6.5 微信小程序隐私协议
-
-使用 `chooseAvatar`、`nickname` 等 API 前，必须：
-1. `app.json` 配置 `"__usePrivacyCheck__": true`
-2. 微信后台"用户隐私保护指引"勾选对应接口
-3. 代码处理 `wx.getPrivacySetting` + `agreePrivacyAuthorization`
-
-禁止用 `type="text"` 替换 `type="nickname"` 绕过。
-
-### 6.6 部署后三层验证
-
-每次推送到服务器后：
-1. **API 层**：`curl http://localhost:3000/api/ships` 返回正确 JSON
-2. **管理后台**：浏览器访问渲染正常
-3. **小程序端**：实机访问数据一致
-
-三层一致才算部署完成。
+**遇到坑请直接读 `.cursor/rules/dev-workflow.mdc` 对应章节，不要在 AGENTS.md 里扩写。**
 
 ---
 

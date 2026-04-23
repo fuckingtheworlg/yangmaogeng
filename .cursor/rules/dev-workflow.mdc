@@ -1,147 +1,126 @@
+# 项目特有开发规范（羊毛梗船舶服务中心）
+
+本文件只记录**本项目特有的踩坑和约定**。通用 AI 协作原则见全局规则：
+
+- 工作契约：`~/.cursor/rules/ai-working-contract.mdc`
+- 排查方法论：`~/.cursor/rules/debug-methodology.mdc`
+- 进度文档：`~/.cursor/rules/progress-doc.mdc`
+
+**优先级**：当本文件与全局规则冲突时，本文件覆盖。
+
 ---
-description: 开发流程防错规范 — mock 替换、问题排查、平台 API、数据容错、构建提交、部署验证
-alwaysApply: true
----
 
-# 开发流程防错规范
+## 1. Mock-to-API 清零检查（项目特有操作）
 
-## 1. Mock-to-API 清零检查
-
-后端 API 开发完成后，必须搜索所有前端代码中残留的 mock 引用：
+后端 API 变更完成后，必须跑一遍残留扫描：
 
 ```bash
-rg "mock" --type vue --type js --type ts -l
+bash scripts/lint-residuals.sh
 ```
 
-- 逐个确认每处 mock 是否已替换为真实 API 调用
-- 小程序端和管理后台两端都要检查，不能只改一端
-- API 函数文件（如 `api/admin.js`）中已定义但未被 import 的函数 = 未接入的信号
+该脚本会检测：硬编码 IP、`localhost:3000` 硬编码、mock 残留、空 catch 块、console.log 残留。
 
-## 2. 问题排查：先证据后结论
+**两端都要查**：小程序端（`miniprogram/`）和管理后台（`admin/`）同改同验。`api/admin.js` 或 `api/index.js` 中定义了但没被 import 的函数 = 未接入的信号。
 
-遇到"数据不一致"、"页面空白"等问题时，严格按顺序执行：
+## 2. 平台级 API 失败：本项目专用的微信小程序检查清单
 
-1. **读源码** — 确认数据来源是 API 还是 mock/本地存储
-2. **查 API 响应** — curl 直接请求接口，确认后端返回值
-3. **查日志** — 后端日志、浏览器 Console、Nginx error.log
-4. **得出结论** — 基于以上证据定位原因
+遇到微信小程序 API 报错或静默失败时，除全局 `debug-methodology.mdc` 第 3 节的通用顺序外，**本项目已确认踩过的具体坑**：
 
-禁止在没有证据的情况下猜测"是缓存问题"或"是网络问题"。
+### 2.1 隐私协议相关 API（chooseAvatar / nickname / getUserProfile 等）
 
-## 3. 平台级 API 失败：先查平台配置，再改代码
+1. `miniprogram/app.json` 是否配 `"__usePrivacyCheck__": true`
+2. 微信后台「用户隐私保护指引」是否勾选了所有用到的 API 接口
+3. 代码中是否有 `wx.getPrivacySetting` + `agreePrivacyAuthorization` 的处理流程
 
-使用微信小程序、支付宝小程序等平台的原生 API 时，如果 API 报错或静默失败：
+**禁止**用 `type="text"` 替换 `type="nickname"` 绕过平台 API。
 
-**排查优先级**（从上到下依次排查，不可跳过）：
+### 2.2 域名相关
 
-1. **平台后台配置** — 隐私协议声明、API 权限开通、域名白名单
-2. **AppID / 基础库版本** — 当前 AppID 是否有该 API 权限，基础库版本是否满足最低要求
-3. **API 调用时序** — 是否需要先授权再调用（如隐私协议同意 → chooseAvatar）
-4. **代码层面** — 事件绑定、参数传递、返回值处理
+- 所有 `wx.request` / `wx.uploadFile` 的目标域名**必须**在小程序后台「服务器域名」白名单中
+- 白名单要求 HTTPS，服务器必须先有 SSL 证书（ICP 备案 ≠ SSL，详见 `docs/progress/deploy.md`）
 
-**禁止行为**：
+## 3. 数据容错：JS/本项目特化补充
 
-- 禁止在未确认平台配置的情况下，用 `type="text"` 替换 `type="nickname"` 等方式绕过平台 API
-- 禁止看到 API "能用"就跳过同类 API 检查（如 chooseAvatar 成功不代表 nickname 也无需配置）
-- 禁止将 `Error: timeout` 类平台内部错误归因为"网络问题"或"组件兼容性"
+全局 `debug-methodology.mdc` 第 6 节已覆盖 null/undefined/类型边界的通用守则。**本项目后端专有**：
 
-**微信小程序隐私协议检查清单**：
+### 3.1 写数据库前统一序列化函数
 
-- `app.json` 中是否配置 `"__usePrivacyCheck__": true`
-- 微信后台"用户隐私保护指引"中是否勾选了所有用到的 API 接口
-- 代码中是否有 `wx.getPrivacySetting` + `agreePrivacyAuthorization` 处理流程
-
-## 4. 数据容错与历史数据测试
-
-### 4.1 JS 类型陷阱
-
-`typeof null === 'object'`，所以"对象就序列化"这种判断永远要**先排 null**：
+后端每个写 DB 的 POST/PUT 必须遵循：
 
 ```js
-// 错
-if (typeof v === 'object') JSON.stringify(v)   // null → '"null"' 字符串炸 INT 列
-
-// 对
+// null / undefined → SQL NULL（或 PUT 时跳过该字段）
+// 数组 / 对象 → JSON.stringify
+// 其他 → 原样
 if (v === null || v === undefined) return null
 if (Array.isArray(v) || typeof v === 'object') return JSON.stringify(v)
 return v
 ```
 
-后端每个写数据库的 POST/PUT 必须遵循：
-- `null / undefined` → SQL NULL（或 PUT 时跳过该字段）
-- 数组/对象 → `JSON.stringify`
-- 其他 → 原样
+关键点：`typeof null === 'object'`，必须**先排 null**。
 
-### 4.2 Schema 迁移后必须测历史数据
+### 3.2 前端 `{ ...row, ... }` 的陷阱
 
-每次 `ALTER TABLE ADD COLUMN` 之后：
+管理后台 `form = { ...row, ... }` 会把后端返回的 null、时间字符串、多余字段一起带回提交。对策：
 
-1. 新数据字段值完整（测试永远 happy path）
-2. **旧数据可能是 NULL**（即使列带 DEFAULT 0，个别行可能因执行时序或历史操作遗留 NULL）
-3. 必须至少抽样编辑一条 migration 之前就存在的旧行，完整走一遍"读取 → 展开 → 修改 → 保存"
+- 列白名单明确要提交的字段
+- 数值字段 edit 时用 `parseFloat(row.x) || 0` 兜底
+- 后端对 null/undefined 幂等处理（视为不更新）
 
-禁止只用"新增的数据"测完就交付。
+### 3.3 Schema 迁移后必须测历史数据（本项目已累计 4 次 migration）
 
-### 4.3 `...row` 展开要警惕
+`ALTER TABLE ADD COLUMN` 之后，旧行新字段可能是 NULL（即使列带 DEFAULT）。必须抽样一条**迁移前**就存在的行，走完整「读 → 展开 → 修改 → 保存」流程。
 
-前端 `form = { ...row, ... }` 会把后端返回的 null、时间字符串、多余字段一起带回去提交。做法：
-- 能列白名单就只发白名单字段
-- 或者后端对 null/undefined 做幂等处理（视为不更新）
-- 数值字段（price/width/...）在 edit 时用 `parseFloat(row.x) || 0` 兜底，避免字符串混入
+## 4. 构建产物提交前验证（本项目 `admin/dist/` 进 git）
 
-### 4.4 错误必须可见
+本项目 `.gitignore` 对 `admin/dist/` 做了白名单（`!admin/dist/`），**前端构建产物要 commit 到 git**（服务器 pull 更新，不在服务器构建）。
 
-后端所有 `catch (err)` **必须** `console.error(err)` 带 stack 打到日志，否则 journalctl 只看得到重启信息看不到错误。
+每次 `npm run build` 后：
 
-前端 `catch` 的 toast 必须带后端 message：
-
-```js
-ElMessage.error(res?.message || err?.response?.data?.message || '操作失败')
+```bash
+git status                              # 确认 dist/ 变更在变更列表
+git check-ignore -v <file>              # 如果没出现，查为何被忽略
+git add -f admin/dist                   # 被误忽略时强制添加
+git show --stat HEAD                    # 提交后验证文件数量
 ```
 
-开发/预发环境，后端应把具体 SQL / 字段错误返回前端，生产环境才脱敏。
+## 5. 部署后三层验证（本项目三端联动，缺一不可）
 
-## 5. 构建产物提交前验证
+每次 push 到服务器后：
 
-每次重新构建 dist/ 并提交时：
+1. **API 层**：`curl https://yangmaogeng.top/api/ships` 返回正确 JSON
+2. **管理后台**：浏览器访问 `https://yangmaogeng.top/` 渲染正常，数据与 curl 一致
+3. **小程序端**：微信开发者工具清缓存+真机预览，数据与上两层一致
 
-1. 构建完成后执行 `git status`，确认新文件出现在变更列表中
-2. 如果新文件未出现，执行 `git check-ignore -v <file>` 检查是否被 .gitignore 排除
-3. 被排除时使用 `git add -f <path>` 强制添加
-4. 提交后执行 `git show --stat HEAD`，确认文件数量符合预期
+或直接跑：`bash test-scripts/run-all-tests.sh`（API 层自动化）。
 
-## 6. 部署后端到端验证
+## 6. 进度文档维护（本项目模块映射）
 
-每次推送到服务器后，三层验证缺一不可：
+**全局规则**：`~/.cursor/rules/progress-doc.mdc`（触发条件、四段式结构、禁止行为）。
 
-1. **API 层** — `curl http://localhost:3000/api/xxx` 确认返回正确 JSON
-2. **管理后台** — 浏览器访问确认页面渲染正常、数据与 curl 结果一致
-3. **小程序端** — 确认小程序显示的数据与 API 返回一致
+**本项目已有模块**（对应 `docs/progress/` 下的文件）：
 
-三层数据全部一致才算部署完成。
+| 代码位置 | 文档 |
+|---|---|
+| `server/routes/ships.js` / `admin/src/views/ship/` / `miniprogram/pages/detail` | `docs/progress/ship.md` |
+| `server/routes/commissions.js` / `admin/src/views/commission/` | `docs/progress/commission.md` |
+| `server/routes/transactions.js` / `admin/src/views/transaction/` | `docs/progress/transaction.md` |
+| `server/routes/wx.js` / `admin/src/views/user/` | `docs/progress/user.md` |
+| `server/routes/favorites.js` | `docs/progress/favorites.md` |
+| `server/routes/upload.js` / `admin/src/components/ImageUploader.vue` | `docs/progress/upload.md` |
+| `server/config/migration-*.sql` | `docs/progress/schema.md` |
+| `server/deploy.sh` / `server/setup-*.sh` | `docs/progress/deploy.md` |
 
-## 7. 模块完成后必须更新进度文档
+**本项目允许跳过文档的情况**（对应全局规则 5. 元规则的项目实例化）：
 
-完成一个**模块级功能**（非琐碎改动）后，必须在 `docs/progress/<模块名>.md` 追加或更新记录，结构固定为四段：
+- 单行语法兼容修复（如 Nginx 版本差异、lint 规则调整）
+- 构建产物重新生成（`admin/dist/`）
+- 文档本身的修订
+- 纯重命名（变量/文件名）且不改语义
 
-1. **已完成** — 列出本次改动涉及的关键文件路径和完成日期（YYYY-MM-DD）
-2. **关键决策** — 为什么这么做、为什么不那么做（选型、字段类型、字段命名、接口形状等）
-3. **已知限制 / 待办** — 当前版本没做的、延后的、有已知问题的，用 `- [ ]` 标记
-4. **踩坑记录** — 本次调试中解决的非平凡 bug，附修复位置（文件:行号）
+**即使跳过文档，commit message 必须写清根因。** 若该改动是全局规则"修复非显而易见 bug"（调试超过 30 分钟）的情形，则**不允许**跳过，必须写「踩坑记录」段。
 
-**判定标准**（满足其一即必须写文档）：
+## 7. 会话起手动作
 
-- 新增或修改了 API 端点
-- 执行了 `ALTER TABLE`、新建表、修改索引
-- 涉及两端及以上联调（admin / miniprogram / server）
-- 修复了本规范第 1~6 条中已列出的典型坑（JS 类型、平台配置、数据容错、构建产物、部署验证等）
-- 做了任何技术选型 / 架构决策
+开始一个涉及已有模块的任务前，先读对应的 `docs/progress/<模块>.md`，确认不重复已完成工作、不违反既有决策。
 
-**禁止行为**：
-
-- 禁止只改代码不更文档就声明"已完成"
-- 禁止把"踩坑记录"省略成"修了个 bug"这种无信息量描述；必须写清**现象 → 根因 → 修复位置**
-- 禁止在 `docs/progress/` 之外散落 README 或 CHANGELOG，所有模块进度集中在此目录
-- 禁止只写"新增功能"不写"关键决策"——空白也要显式写"无特殊决策"以表明已思考过
-
-**会话起手动作**：开始一个涉及已有模块的任务前，先读取 `docs/progress/<该模块>.md`，确认不重复已完成工作、不违反既有决策。
+若本次改动会影响**后端地址 / API 契约**，提交前跑一次 `bash scripts/lint-residuals.sh`。
