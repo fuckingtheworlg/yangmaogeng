@@ -1,5 +1,4 @@
 const { get, post, del } = require('../../utils/request')
-const { mockShips } = require('../../utils/mock')
 const app = getApp()
 
 Page({
@@ -90,19 +89,8 @@ Page({
           }
         }
         return null
-      }).catch(() => {
-        const ship = mockShips.find(s => s.id === id)
-        if (ship) {
-          return {
-            id: ship.id,
-            ship_id: ship.id,
-            ship_no: ship.ship_no,
-            deadweight: ship.deadweight,
-            price: ship.price,
-            ship_type: ship.ship_type,
-            image: ship.images ? ship.images[0] : ''
-          }
-        }
+      }).catch(err => {
+        console.error(`[favorites] 拉取船舶 ${id} 详情失败:`, err)
         return null
       })
     )

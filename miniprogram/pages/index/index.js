@@ -1,5 +1,4 @@
 const { get } = require('../../utils/request')
-const { mockShips } = require('../../utils/mock')
 const app = getApp()
 
 Page({
@@ -77,11 +76,13 @@ Page({
         const list = res.data.list.map(s => this.formatShip(s))
         this.setData({ shipList: list, loading: false })
       } else {
-        this.setData({ shipList: mockShips, loading: false })
+        this.setData({ shipList: [], loading: false })
+        wx.showToast({ title: (res && res.message) || '加载船舶失败', icon: 'none' })
       }
-    }).catch(() => {
-      console.log('API 请求失败，使用本地数据')
-      this.setData({ shipList: mockShips, loading: false })
+    }).catch(err => {
+      console.error('[ships] 获取船舶列表失败:', err)
+      this.setData({ shipList: [], loading: false })
+      wx.showToast({ title: (err && err.errMsg) || '网络异常，请重试', icon: 'none' })
     })
   },
 

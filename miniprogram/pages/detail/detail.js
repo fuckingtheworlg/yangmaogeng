@@ -1,5 +1,4 @@
 const { get, post, del } = require('../../utils/request')
-const { mockShips } = require('../../utils/mock')
 const { requireLogin } = require('../../utils/auth')
 const app = getApp()
 
@@ -54,17 +53,12 @@ Page({
       if (res.code === 200 && res.data) {
         this.setShipData(this.formatShip(res.data))
       } else {
-        this.loadMockShip(id)
+        wx.showToast({ title: (res && res.message) || '船舶信息加载失败', icon: 'none' })
       }
-    }).catch(() => {
-      console.log('API 请求失败，使用本地数据')
-      this.loadMockShip(id)
+    }).catch(err => {
+      console.error('[ship detail] 获取船舶详情失败:', err)
+      wx.showToast({ title: (err && err.errMsg) || '网络异常，请重试', icon: 'none' })
     })
-  },
-
-  loadMockShip(id) {
-    const ship = mockShips.find(s => s.id === id)
-    if (ship) this.setShipData(ship)
   },
 
   setShipData(ship) {
