@@ -1,7 +1,7 @@
 App({
   globalData: {
-    baseUrl: 'http://47.114.89.50/api',
-    serverUrl: 'http://47.114.89.50',
+    baseUrl: 'https://yangmaogeng.top/api',
+    serverUrl: 'https://yangmaogeng.top',
     userInfo: null,
     token: '',
     statusBarHeight: 20,

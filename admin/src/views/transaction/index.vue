@@ -119,7 +119,6 @@ import { Search, Plus } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getTransactions, addTransaction, updateTransaction, deleteTransaction, getShips } from '../../api/admin'
 
-const API_BASE = 'http://47.114.89.50'
 const tableData = ref([])
 const loading = ref(false)
 const saving = ref(false)
@@ -144,7 +143,7 @@ function firstImage(raw) {
 function resolveUrl(url) {
   if (!url) return ''
   if (url.startsWith('http')) return url
-  if (url.startsWith('/uploads')) return API_BASE + url
+  if (url.startsWith('/uploads')) return url
   return url
 }
 

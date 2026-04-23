@@ -12,7 +12,7 @@ else
   C_RESET=''; C_RED=''; C_GREEN=''; C_BLUE=''; C_BOLD=''
 fi
 
-export BASE_URL="${BASE_URL:-http://47.114.89.50}"
+export BASE_URL="${BASE_URL:-https://yangmaogeng.top}"
 
 echo -e "${C_BOLD}${C_BLUE}#### 羊毛梗 API 回归测试套件 ####${C_RESET}"
 echo -e "  BASE_URL = ${BASE_URL}"

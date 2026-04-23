@@ -299,7 +299,6 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { getShips, addShip, updateShip, deleteShip, finalizeShip } from '../../api/admin'
 import ImageUploader from '../../components/ImageUploader.vue'
 
-const API_BASE = 'http://47.114.89.50'
 function parseList(raw) {
   if (!raw) return []
   if (Array.isArray(raw)) return raw.filter(Boolean)
@@ -317,7 +316,7 @@ function firstImage(raw) {
 function resolveUrl(url) {
   if (!url) return ''
   if (url.startsWith('http')) return url
-  if (url.startsWith('/uploads')) return API_BASE + url
+  if (url.startsWith('/uploads')) return url
   return url
 }
 

@@ -27,7 +27,7 @@ test-scripts/
 ## 快速开始
 
 ```bash
-# 对线上后端跑全套（默认 BASE_URL=http://47.114.89.50）
+# 对线上后端跑全套（默认 BASE_URL=https://yangmaogeng.top）
 bash test-scripts/run-all-tests.sh
 
 # 对本地后端跑
@@ -44,7 +44,7 @@ ADMIN_USER=admin ADMIN_PASS=admin123 bash test-scripts/run-all-tests.sh
 
 | 变量 | 默认值 | 说明 |
 |---|---|---|
-| `BASE_URL` | `http://47.114.89.50` | 被测后端地址，不带末尾 `/` |
+| `BASE_URL` | `https://yangmaogeng.top` | 被测后端地址，不带末尾 `/` |
 | `ADMIN_USER` | `admin` | 管理员用户名 |
 | `ADMIN_PASS` | `admin123` | 管理员密码 |
 | `ADMIN_DEV_PORT` | `5173` | admin vite dev server 端口（仅 `99_frontend_proxy.sh` 使用） |
@@ -80,7 +80,7 @@ ADMIN_USER=admin ADMIN_PASS=admin123 bash test-scripts/run-all-tests.sh
 bash test-scripts/run-all-tests.sh
 
 # 2. 管理后台
-open http://47.114.89.50/ship
+open https://yangmaogeng.top/ship
 
 # 3. 小程序真机预览
 ```

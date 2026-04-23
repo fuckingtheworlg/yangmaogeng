@@ -44,8 +44,7 @@ const props = defineProps({
 })
 const emit = defineEmits(['update:modelValue'])
 
-const API_BASE = 'http://47.114.89.50'
-const action = `${API_BASE}/api/upload`
+const action = '/api/upload'
 
 const headers = computed(() => {
   const token = localStorage.getItem('admin_token')
@@ -57,7 +56,7 @@ const list = computed(() => Array.isArray(props.modelValue) ? props.modelValue :
 function resolveUrl(url) {
   if (!url) return ''
   if (url.startsWith('http')) return url
-  if (url.startsWith('/uploads')) return API_BASE + url
+  if (url.startsWith('/uploads')) return url
   return url
 }
 

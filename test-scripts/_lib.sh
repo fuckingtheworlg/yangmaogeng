@@ -3,7 +3,7 @@
 # 约定：所有 0X_*.sh 脚本 source 这个文件后即可使用统一的断言、着色、计数器
 
 # BASE_URL 可通过环境变量覆盖，默认指向阿里云线上后端
-export BASE_URL="${BASE_URL:-http://47.114.89.50}"
+export BASE_URL="${BASE_URL:-https://yangmaogeng.top}"
 export ADMIN_USER="${ADMIN_USER:-admin}"
 export ADMIN_PASS="${ADMIN_PASS:-admin123}"
 
