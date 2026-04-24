@@ -86,7 +86,7 @@
     <view class="login-modal" catchtap="">
       <view class="login-modal-header">
         <text class="login-modal-title">微信账号登录</text>
-        <text class="login-modal-subtitle">请授权获取微信头像和昵称</text>
+        <text class="login-modal-subtitle">点击下方选择微信头像和昵称</text>
       </view>
 
       <view class="login-row">
@@ -102,13 +102,14 @@
         <input
           class="nickname-input"
           type="nickname"
-          placeholder="请输入昵称"
+          placeholder="点击后选择微信昵称"
           value="{{tempNickname}}"
           bindinput="onNicknameInput"
           bindblur="onNicknameBlur"
           bindconfirm="onNicknameConfirm"
         />
       </view>
+      <view class="nickname-hint">真机上点击输入框会弹出"使用微信昵称"按钮；开发者工具需手动输入</view>
 
       <view class="privacy-tip" wx:if="{{!privacyAgreed}}">
         <text class="privacy-text">登录前请先同意</text>

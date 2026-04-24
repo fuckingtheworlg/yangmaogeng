@@ -231,15 +231,25 @@ Page({
 
   confirmLogin() {
     const { tempAvatar, tempNickname } = this.data
+    // #region agent log
+    console.log('[DEBUG-3ffe2d] [CONFIRM-1] confirmLogin called, tempAvatar=', tempAvatar ? 'yes' : 'no', 'tempNickname=', tempNickname)
+    // #endregion
+    if (!tempAvatar) {
+      wx.showToast({ title: '请先选择头像', icon: 'none', duration: 2500 })
+      return
+    }
     if (!tempNickname || !tempNickname.trim()) {
-      wx.showToast({ title: '请填写昵称', icon: 'none' })
+      wx.showToast({ title: '请填写/选择昵称', icon: 'none', duration: 2500 })
       return
     }
     const nickname = tempNickname.trim()
-    const avatar = tempAvatar || ''
+    const avatar = tempAvatar
     wx.showLoading({ title: '登录中...', mask: true })
     wx.login({
       success: (wxRes) => {
+        // #region agent log
+        console.log('[DEBUG-3ffe2d] [CONFIRM-2] wx.login success, code=', wxRes.code ? 'got' : 'empty')
+        // #endregion
         if (!wxRes.code) {
           wx.hideLoading()
           wx.showToast({ title: '微信登录失败', icon: 'none' })
@@ -247,6 +257,9 @@ Page({
         }
         post('/wx/login', { code: wxRes.code, nickname, avatar })
           .then(res => {
+            // #region agent log
+            console.log('[DEBUG-3ffe2d] [CONFIRM-3] POST /wx/login response:', JSON.stringify(res))
+            // #endregion
             wx.hideLoading()
             if (res && res.code === 200 && res.data) {
               const token = res.data.token
@@ -273,7 +286,10 @@ Page({
               wx.showToast({ title: (res && res.message) || '登录失败', icon: 'none' })
             }
           })
-          .catch(() => {
+          .catch((err) => {
+            // #region agent log
+            console.error('[DEBUG-3ffe2d] [CONFIRM-E] POST /wx/login failed:', err)
+            // #endregion
             wx.hideLoading()
             // 网络失败时兜底：仅写本地，保证体验不中断
             const userInfo = { nickName: nickname, avatarUrl: avatar }
@@ -288,7 +304,10 @@ Page({
             wx.showToast({ title: '已离线登录', icon: 'none' })
           })
       },
-      fail: () => {
+      fail: (err) => {
+        // #region agent log
+        console.error('[DEBUG-3ffe2d] [CONFIRM-E] wx.login fail:', err)
+        // #endregion
         wx.hideLoading()
         wx.showToast({ title: '微信登录失败', icon: 'none' })
       }

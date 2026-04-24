@@ -329,6 +329,13 @@
   color: var(--color-text);
   text-align: right;
 }
+.nickname-hint {
+  font-size: 20rpx;
+  color: var(--color-text-hint);
+  line-height: 1.5;
+  padding: 12rpx 0 4rpx;
+  text-align: left;
+}
 .privacy-tip {
   display: flex;
   align-items: center;
