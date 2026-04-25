@@ -202,7 +202,13 @@
               </el-select>
             </el-form-item>
           </el-col>
-          <el-col :span="12"><el-form-item label="船型"><el-input v-model="editForm.ship_type" /></el-form-item></el-col>
+          <el-col :span="12">
+            <el-form-item label="船型">
+              <el-select v-model="editForm.ship_type" style="width:100%" placeholder="请选择船型">
+                <el-option v-for="type in shipTypes" :key="type" :label="type" :value="type" />
+              </el-select>
+            </el-form-item>
+          </el-col>
         </el-row>
         <el-row :gutter="16">
           <el-col :span="8"><el-form-item label="主机品牌"><el-input v-model="editForm.engine_brand" /></el-form-item></el-col>
@@ -210,7 +216,13 @@
           <el-col :span="8"><el-form-item label="主机数量"><el-input-number v-model="editForm.engine_count" :min="1" style="width:100%" /></el-form-item></el-col>
         </el-row>
         <el-row :gutter="16" v-if="editForm.type === 'sell'">
-          <el-col :span="24"><el-form-item label="船型"><el-input v-model="editForm.ship_type" /></el-form-item></el-col>
+          <el-col :span="24">
+            <el-form-item label="船型">
+              <el-select v-model="editForm.ship_type" style="width:100%" placeholder="请选择船型">
+                <el-option v-for="type in shipTypes" :key="type" :label="type" :value="type" />
+              </el-select>
+            </el-form-item>
+          </el-col>
         </el-row>
         <el-row :gutter="16">
           <el-col :span="12" v-if="editForm.type === 'buy'">
@@ -298,7 +310,13 @@
         </el-row>
         <el-row :gutter="16">
           <el-col :span="12"><el-form-item label="港籍"><el-input v-model="importForm.port_registry" /></el-form-item></el-col>
-          <el-col :span="12"><el-form-item label="船型"><el-input v-model="importForm.ship_type" /></el-form-item></el-col>
+          <el-col :span="12">
+            <el-form-item label="船型">
+              <el-select v-model="importForm.ship_type" style="width:100%" placeholder="请选择船型">
+                <el-option v-for="type in shipTypes" :key="type" :label="type" :value="type" />
+              </el-select>
+            </el-form-item>
+          </el-col>
         </el-row>
         <el-row :gutter="16">
           <el-col :span="8"><el-form-item label="主机品牌"><el-input v-model="importForm.engine_brand" /></el-form-item></el-col>
@@ -385,6 +403,7 @@ const loading = ref(false)
 const saving = ref(false)
 const activeTab = ref('buy')
 const filters = ref({ keyword: '', status: null, total_length: '', build_date: '', contact_name: '' })
+const shipTypes = ['干散货船', '甲板船', '集装箱船', '液货船', '客船', '其他']
 
 const statusMap = {
   0: { label: '待处理', type: 'warning' },
