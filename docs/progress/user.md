@@ -30,6 +30,28 @@
 
 ## 踩坑记录
 
+### ⚠️ 2026-04-25 真机 `chooseAvatar` 返回后登录弹窗自动关闭
+
+- **现象**：真机上点击"使用微信头像"后，头像 / 昵称输入框所在的登录弹窗直接消失，用户无法继续选择昵称和确认登录
+- **根因**：登录遮罩层 `login-mask` 绑定了 `bindtap="closeLoginModal"`，内部弹窗 `login-modal` 写的是空 `catchtap=""`。真机原生 `chooseAvatar` 弹层返回后，点击事件冒泡到遮罩层，触发关闭
+- **修复**：
+  1. 去掉 `login-mask` 的点击关闭行为，只允许用户点击"取消"关闭登录弹窗
+  2. `login-modal` 改成 `catchtap="noop"`，用明确的空处理函数阻止冒泡，避免空 handler 在真机行为不稳定
+- **预防**：涉及 `chooseAvatar` / `agreePrivacyAuthorization` 这类原生弹层时，不要依赖遮罩点击关闭；弹窗内层必须使用真实 handler 做 `catchtap`
+
+### ⚠️ 2026-04-24 真机登录两个深坑：onLogin 清空 state + 头像存本地临时路径
+
+- **现象**：真机上选完头像后看起来"没反应"，反复点"点击登录"都无法登录
+- **日志特征**：`onLogin` 被调用 4 次，`onChooseAvatar` 成功触发并拿到 `wxfile://tmp_xxx.jpg`，但没有任何 `[CONFIRM-*]` 日志（用户从未真正走到确认登录这一步）
+- **双重根因**：
+  1. **前端 state 重置 bug**：`profile.js:onLogin` 每次都 `setData({ tempAvatar: '', tempNickname: '' })`，用户误触背景重开弹窗会清空已选的头像/昵称
+  2. **头像存储设计 bug**：`<button open-type="chooseAvatar">` 回调返回的 `wxfile://tmp_xxx.jpg` 是**手机本地临时路径**，别人看不到、自己清缓存也没了；之前代码直接把这个字符串存到 `users.avatar`，等于没存
+- **修复**：
+  1. `onLogin` 不再清空 `tempAvatar/tempNickname`，只有登录成功和主动登出时清
+  2. `confirmLogin` 新增 `_uploadAvatarIfLocal` 步骤：调 `wx.uploadFile → POST /api/upload` 先把头像上传成 `https://yangmaogeng.top/uploads/xxx.jpg` 永久 URL，再传给 `/wx/login` 存库
+  3. 已登录过一次的 `avatarUrl`（https 开头）不重复上传，直接复用
+- **关于日志噪音（纯背景，非 bug）**：`not node js file system!path:/saaa_config.json`、`no such file 'wxfile://sdk/session.../better_log_persist.log'`、`backgroundfetch privacy fail (errno:101)` 均为微信 SDK 真机内部警告，每个项目都有，可完全忽略
+
 ### ⚠️ 2026-04-24 后端 `mock_openid_${code}` 导致同一用户反复生成新账号
 
 - **现象**：切换到真实 AppID/AppSecret 前，每次 `wx.login` 都会让 `users` 表多一条记录

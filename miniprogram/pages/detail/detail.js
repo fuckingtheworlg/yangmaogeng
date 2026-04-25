@@ -5,6 +5,9 @@ const app = getApp()
 Page({
   data: {
     ship: {},
+    basicParams: [],
+    buildInfo: [],
+    engineInfo: [],
     isFavorited: false,
     conditionClass: 'normal',
     unitPrice: '',
@@ -48,6 +51,44 @@ Page({
     return ship
   },
 
+  isVisibleValue(value) {
+    if (value === null || value === undefined) return false
+    const text = String(value).trim()
+    if (!text) return false
+    return !/^0(?:\.0+)?$/.test(text)
+  },
+
+  makeField(label, value, unit = '') {
+    if (!this.isVisibleValue(value)) return null
+    return { label, value, unit }
+  },
+
+  buildDetailFields(ship) {
+    const basicParams = [
+      this.makeField('总长', ship.total_length, '米'),
+      this.makeField('型宽', ship.width, '米'),
+      this.makeField('型深', ship.depth, '米'),
+      this.makeField('载重吨', ship.deadweight, '吨'),
+      this.makeField('总吨', ship.gross_tonnage, '吨'),
+      this.makeField('船型', ship.ship_type),
+      this.makeField('水域', ship.water_type)
+    ].filter(Boolean)
+
+    const buildInfo = [
+      this.makeField('建造时间', ship.build_date),
+      this.makeField('建造地点', ship.build_province),
+      this.makeField('港籍', ship.port_registry)
+    ].filter(Boolean)
+
+    const engineInfo = [
+      this.makeField('主机品牌', ship.engine_brand),
+      this.makeField('主机型号', ship.engine_power),
+      this.makeField('主机数量', ship.engine_count, '台')
+    ].filter(Boolean)
+
+    return { basicParams, buildInfo, engineInfo }
+  },
+
   fetchShipDetail(id) {
     get(`/ships/${id}`).then(res => {
       if (res.code === 200 && res.data) {
@@ -72,7 +113,8 @@ Page({
       const unit = (price * 10000 / dwt)
       unitPrice = unit >= 100 ? unit.toFixed(0) : unit.toFixed(1)
     }
-    this.setData({ ship, conditionClass, unitPrice })
+    const { basicParams, buildInfo, engineInfo } = this.buildDetailFields(ship)
+    this.setData({ ship, basicParams, buildInfo, engineInfo, conditionClass, unitPrice })
   },
 
   checkFavorite(id) {

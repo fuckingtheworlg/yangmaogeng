@@ -97,7 +97,7 @@
         <div class="detail-item"><span class="dl">总吨：</span>{{ currentItem.gross_tonnage }}吨</div>
         <div class="detail-item"><span class="dl">建造时间：</span>{{ currentItem.ship_build_date }}</div>
         <div class="detail-item"><span class="dl">主机品牌：</span>{{ currentItem.engine_brand }}</div>
-        <div class="detail-item"><span class="dl">主机功率：</span>{{ currentItem.engine_power }}千瓦</div>
+        <div class="detail-item"><span class="dl">主机型号：</span>{{ displayText(currentItem.engine_power) || '-' }}</div>
         <div class="detail-item"><span class="dl">水域：</span>{{ currentItem.water_type }}</div>
         <div class="detail-item"><span class="dl">成交价：</span><span style="color:#CC0000;font-weight:bold">{{ currentItem.price }}万元</span></div>
         <div class="detail-item"><span class="dl">成交日期：</span>{{ currentItem.deal_date }}</div>
@@ -145,6 +145,13 @@ function resolveUrl(url) {
   if (url.startsWith('http')) return url
   if (url.startsWith('/uploads')) return url
   return url
+}
+
+function displayText(value) {
+  if (value === null || value === undefined) return ''
+  const text = String(value).trim()
+  if (!text || /^0(?:\.0+)?$/.test(text)) return ''
+  return text
 }
 
 async function fetchData() {

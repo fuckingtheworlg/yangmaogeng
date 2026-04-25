@@ -82,8 +82,8 @@
   </view>
 
   <!-- 登录弹窗 -->
-  <view class="login-mask" wx:if="{{showLoginModal}}" bindtap="closeLoginModal">
-    <view class="login-modal" catchtap="">
+  <view class="login-mask" wx:if="{{showLoginModal}}">
+    <view class="login-modal" catchtap="noop">
       <view class="login-modal-header">
         <text class="login-modal-title">微信账号登录</text>
         <text class="login-modal-subtitle">点击下方选择微信头像和昵称</text>

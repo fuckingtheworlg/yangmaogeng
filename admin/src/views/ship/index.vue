@@ -24,8 +24,8 @@
       <el-table-column prop="build_date" label="建造时间" width="100" />
       <el-table-column prop="build_province" label="建造地点" width="90" />
       <el-table-column prop="engine_brand" label="主机品牌" width="90" />
-      <el-table-column prop="engine_power" label="主机功率" width="90">
-        <template #default="{ row }">{{ row.engine_power }}千瓦</template>
+      <el-table-column prop="engine_power" label="主机型号" width="90">
+        <template #default="{ row }">{{ displayText(row.engine_power) }}</template>
       </el-table-column>
       <el-table-column prop="engine_count" label="主机数量" width="90">
         <template #default="{ row }">{{ row.engine_count || 1 }}台</template>
@@ -122,7 +122,7 @@
         <div class="detail-item"><span class="dl">建造地点：</span>{{ currentShip.build_province }}</div>
         <div class="detail-item"><span class="dl">港籍：</span>{{ currentShip.port_registry }}</div>
         <div class="detail-item"><span class="dl">主机品牌：</span>{{ currentShip.engine_brand }}</div>
-        <div class="detail-item"><span class="dl">主机功率：</span>{{ currentShip.engine_power }}千瓦</div>
+        <div class="detail-item"><span class="dl">主机型号：</span>{{ displayText(currentShip.engine_power) || '-' }}</div>
         <div class="detail-item"><span class="dl">主机数量：</span>{{ currentShip.engine_count || 1 }}台</div>
         <div class="detail-item"><span class="dl">水域：</span>{{ currentShip.water_type }}</div>
         <div class="detail-item"><span class="dl">船况：</span>{{ currentShip.ship_condition }}</div>
@@ -232,7 +232,7 @@
         </el-row>
         <el-row :gutter="16">
           <el-col :span="8"><el-form-item label="主机品牌"><el-input v-model="shipForm.engine_brand" /></el-form-item></el-col>
-          <el-col :span="8"><el-form-item label="主机力量(千瓦)"><el-input-number v-model="shipForm.engine_power" :min="0" style="width:100%" /></el-form-item></el-col>
+          <el-col :span="8"><el-form-item label="主机型号"><el-input-number v-model="shipForm.engine_power" :min="0" style="width:100%" /></el-form-item></el-col>
           <el-col :span="8"><el-form-item label="主机数量(台)"><el-input-number v-model="shipForm.engine_count" :min="1" style="width:100%" /></el-form-item></el-col>
         </el-row>
         <el-row :gutter="16">
@@ -340,6 +340,13 @@ const finalizeForm = ref({ buyer_name: '', buyer_phone: '', seller_name: '', sel
 function formatPrice(price) {
   const n = parseFloat(price)
   return Number.isInteger(n) ? n : n.toFixed(0)
+}
+
+function displayText(value) {
+  if (value === null || value === undefined) return ''
+  const text = String(value).trim()
+  if (!text || /^0(?:\.0+)?$/.test(text)) return ''
+  return text
 }
 
 function statusTag(status) {

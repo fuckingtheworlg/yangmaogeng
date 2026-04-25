@@ -32,94 +32,50 @@
         <text class="unit-price-label">单价</text>
         <text class="unit-price-value">¥{{unitPrice}} / 吨</text>
       </view>
-      <view class="no-row">
+      <view class="no-row" wx:if="{{ship.ship_no}}">
         <text class="ship-no-label">船舶编号</text>
         <text class="ship-no-value">{{ship.ship_no}}</text>
-      </view>
-      <view class="no-row" wx:if="{{ship.ship_name}}">
-        <text class="ship-no-label">船号</text>
-        <text class="ship-no-value">{{ship.ship_name}}</text>
       </view>
     </view>
 
     <!-- 基本参数 -->
-    <view class="section-card">
+    <view class="section-card" wx:if="{{basicParams.length > 0}}">
       <view class="section-title">
         <view class="section-title-bar"></view>
         <text>基本参数</text>
       </view>
       <view class="param-grid">
-        <view class="param-cell">
-          <text class="param-label">总长</text>
-          <text class="param-value">{{ship.total_length}}<text class="param-unit">米</text></text>
-        </view>
-        <view class="param-cell">
-          <text class="param-label">型宽</text>
-          <text class="param-value">{{ship.width}}<text class="param-unit">米</text></text>
-        </view>
-        <view class="param-cell">
-          <text class="param-label">型深</text>
-          <text class="param-value">{{ship.depth}}<text class="param-unit">米</text></text>
-        </view>
-        <view class="param-cell">
-          <text class="param-label">载重吨</text>
-          <text class="param-value">{{ship.deadweight}}<text class="param-unit">吨</text></text>
-        </view>
-        <view class="param-cell">
-          <text class="param-label">总吨</text>
-          <text class="param-value">{{ship.gross_tonnage}}<text class="param-unit">吨</text></text>
-        </view>
-        <view class="param-cell">
-          <text class="param-label">船型</text>
-          <text class="param-value">{{ship.ship_type}}</text>
-        </view>
-        <view class="param-cell">
-          <text class="param-label">水域</text>
-          <text class="param-value">{{ship.water_type}}</text>
+        <view class="param-cell" wx:for="{{basicParams}}" wx:key="label">
+          <text class="param-label">{{item.label}}</text>
+          <text class="param-value">{{item.value}}<text class="param-unit" wx:if="{{item.unit}}">{{item.unit}}</text></text>
         </view>
       </view>
     </view>
 
     <!-- 建造信息 -->
-    <view class="section-card">
+    <view class="section-card" wx:if="{{buildInfo.length > 0}}">
       <view class="section-title">
         <view class="section-title-bar"></view>
         <text>建造信息</text>
       </view>
       <view class="info-list">
-        <view class="info-item">
-          <text class="info-label">建造时间</text>
-          <text class="info-value">{{ship.build_date}}</text>
-        </view>
-        <view class="info-item">
-          <text class="info-label">建造地点</text>
-          <text class="info-value">{{ship.build_province}}</text>
-        </view>
-        <view class="info-item no-border">
-          <text class="info-label">港籍</text>
-          <text class="info-value">{{ship.port_registry}}</text>
+        <view class="info-item {{index === buildInfo.length - 1 ? 'no-border' : ''}}" wx:for="{{buildInfo}}" wx:key="label">
+          <text class="info-label">{{item.label}}</text>
+          <text class="info-value">{{item.value}}<text wx:if="{{item.unit}}"> {{item.unit}}</text></text>
         </view>
       </view>
     </view>
 
     <!-- 主机信息 -->
-    <view class="section-card">
+    <view class="section-card" wx:if="{{engineInfo.length > 0}}">
       <view class="section-title">
         <view class="section-title-bar"></view>
         <text>动力系统</text>
       </view>
       <view class="info-list">
-        <view class="info-item">
-          <text class="info-label">主机品牌</text>
-          <text class="info-value highlight">{{ship.engine_brand}}</text>
-        </view>
-        <view class="info-item">
-          <text class="info-label">主机功率</text>
-          <text class="info-value">{{ship.engine_power}} KW</text>
-        </view>
-        <view class="info-item no-border">
-          <text class="info-label">主机数量</text>
-          <text class="info-value">{{ship.engine_count || 1}} 台</text>
+        <view class="info-item {{index === engineInfo.length - 1 ? 'no-border' : ''}}" wx:for="{{engineInfo}}" wx:key="label">
+          <text class="info-label">{{item.label}}</text>
+          <text class="info-value {{item.label === '主机品牌' ? 'highlight' : ''}}">{{item.value}}<text wx:if="{{item.unit}}"> {{item.unit}}</text></text>
         </view>
       </view>
     </view>

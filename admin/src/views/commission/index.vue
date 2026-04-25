@@ -28,8 +28,8 @@
           <el-table-column prop="build_date" label="建造时间" width="100" />
           <el-table-column prop="build_province" label="建造地点" width="90" />
           <el-table-column prop="engine_brand" label="主机品牌" width="90" />
-          <el-table-column prop="engine_power" label="主机功率" width="90">
-            <template #default="{ row }">{{ row.engine_power }}千瓦</template>
+          <el-table-column prop="engine_power" label="主机型号" width="90">
+            <template #default="{ row }">{{ displayText(row.engine_power) }}</template>
           </el-table-column>
           <el-table-column prop="water_type" label="内河/沿海" width="90" />
           <el-table-column prop="ship_type" label="船型" width="80" />
@@ -89,8 +89,8 @@
           <el-table-column prop="build_date" label="建造时间" width="100" />
           <el-table-column prop="build_province" label="建造地点" width="90" />
           <el-table-column prop="engine_brand" label="主机品牌" width="90" />
-          <el-table-column prop="engine_power" label="主机功率" width="80">
-            <template #default="{ row }">{{ row.engine_power }}千瓦</template>
+          <el-table-column prop="engine_power" label="主机型号" width="80">
+            <template #default="{ row }">{{ displayText(row.engine_power) }}</template>
           </el-table-column>
           <el-table-column prop="water_type" label="内河/沿海" width="90" />
           <el-table-column prop="ship_type" label="船型" width="80" />
@@ -206,7 +206,7 @@
         </el-row>
         <el-row :gutter="16">
           <el-col :span="8"><el-form-item label="主机品牌"><el-input v-model="editForm.engine_brand" /></el-form-item></el-col>
-          <el-col :span="8"><el-form-item label="主机功率"><el-input-number v-model="editForm.engine_power" :min="0" style="width:100%" /></el-form-item></el-col>
+          <el-col :span="8"><el-form-item label="主机型号"><el-input-number v-model="editForm.engine_power" :min="0" style="width:100%" /></el-form-item></el-col>
           <el-col :span="8"><el-form-item label="主机数量"><el-input-number v-model="editForm.engine_count" :min="1" style="width:100%" /></el-form-item></el-col>
         </el-row>
         <el-row :gutter="16" v-if="editForm.type === 'sell'">
@@ -302,7 +302,7 @@
         </el-row>
         <el-row :gutter="16">
           <el-col :span="8"><el-form-item label="主机品牌"><el-input v-model="importForm.engine_brand" /></el-form-item></el-col>
-          <el-col :span="8"><el-form-item label="主机功率"><el-input-number v-model="importForm.engine_power" :min="0" style="width:100%" /></el-form-item></el-col>
+          <el-col :span="8"><el-form-item label="主机型号"><el-input-number v-model="importForm.engine_power" :min="0" style="width:100%" /></el-form-item></el-col>
           <el-col :span="8">
             <el-form-item label="水域">
               <el-select v-model="importForm.water_type" style="width:100%">
@@ -420,6 +420,13 @@ function resolveUrl(url) {
   if (url.startsWith('http')) return url
   if (url.startsWith('/uploads')) return url
   return url
+}
+
+function displayText(value) {
+  if (value === null || value === undefined) return ''
+  const text = String(value).trim()
+  if (!text || /^0(?:\.0+)?$/.test(text)) return ''
+  return text
 }
 
 function goShip(id) {

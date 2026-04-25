@@ -1,4 +1,4 @@
-const { get, post, del } = require('../../utils/request')
+const { get, post, del, uploadFile } = require('../../utils/request')
 const app = getApp()
 
 Page({
@@ -146,6 +146,7 @@ Page({
     console.log('[DEBUG-3ffe2d] [H-C] privacyAPI available=', privacyCheck)
     // #endregion
 
+    // 注意：不清空 tempAvatar / tempNickname，避免用户误触重开弹窗时清掉已选内容
     if (privacyCheck) {
       wx.getPrivacySetting({
         success: (res) => {
@@ -154,16 +155,12 @@ Page({
           // #endregion
           this.setData({
             showLoginModal: true,
-            tempAvatar: '',
-            tempNickname: '',
             privacyAgreed: res.needAuthorization === false
           })
         },
         fail: () => {
           this.setData({
             showLoginModal: true,
-            tempAvatar: '',
-            tempNickname: '',
             privacyAgreed: true
           })
         }
@@ -171,8 +168,6 @@ Page({
     } else {
       this.setData({
         showLoginModal: true,
-        tempAvatar: '',
-        tempNickname: '',
         privacyAgreed: true
       })
     }
@@ -184,6 +179,8 @@ Page({
   closeLoginModal() {
     this.setData({ showLoginModal: false })
   },
+
+  noop() {},
 
   onAgreePrivacy() {
     // #region agent log
@@ -229,6 +226,22 @@ Page({
     }
   },
 
+  // 头像选择返回的是 wxfile:// 或 http://tmp/ 本地临时路径，必须先上传到服务器换成永久 URL
+  _uploadAvatarIfLocal(localPath) {
+    if (!localPath) return Promise.resolve('')
+    const isLocalTemp = localPath.startsWith('wxfile://') || localPath.startsWith('http://tmp/')
+    if (!isLocalTemp) {
+      // 已是服务器 URL（例如用户之前登录过的 https://yangmaogeng.top/uploads/xxx）
+      return Promise.resolve(localPath)
+    }
+    return uploadFile('/upload', localPath).then(res => {
+      if (res && res.code === 200 && res.data && res.data.url) {
+        return app.globalData.serverUrl + res.data.url
+      }
+      throw new Error((res && res.message) || '头像上传失败')
+    })
+  },
+
   confirmLogin() {
     const { tempAvatar, tempNickname } = this.data
     // #region agent log
@@ -243,75 +256,73 @@ Page({
       return
     }
     const nickname = tempNickname.trim()
-    const avatar = tempAvatar
     wx.showLoading({ title: '登录中...', mask: true })
-    wx.login({
-      success: (wxRes) => {
+
+    this._uploadAvatarIfLocal(tempAvatar)
+      .then(avatarUrl => {
         // #region agent log
-        console.log('[DEBUG-3ffe2d] [CONFIRM-2] wx.login success, code=', wxRes.code ? 'got' : 'empty')
+        console.log('[DEBUG-3ffe2d] [CONFIRM-A] avatar uploaded, url=', avatarUrl)
         // #endregion
-        if (!wxRes.code) {
-          wx.hideLoading()
-          wx.showToast({ title: '微信登录失败', icon: 'none' })
-          return
-        }
-        post('/wx/login', { code: wxRes.code, nickname, avatar })
-          .then(res => {
-            // #region agent log
-            console.log('[DEBUG-3ffe2d] [CONFIRM-3] POST /wx/login response:', JSON.stringify(res))
-            // #endregion
-            wx.hideLoading()
-            if (res && res.code === 200 && res.data) {
-              const token = res.data.token
-              const userInfo = {
-                id: res.data.userInfo && res.data.userInfo.id,
-                nickName: nickname,
-                avatarUrl: avatar
-              }
-              wx.setStorageSync('token', token)
-              wx.setStorageSync('userInfo', userInfo)
-              app.globalData.token = token
-              app.globalData.userInfo = userInfo
-              this.setData({
-                userInfo,
-                isLogin: true,
-                showLoginModal: false,
-                tempAvatar: '',
-                tempNickname: ''
-              })
-              wx.showToast({ title: '登录成功', icon: 'success' })
-              this.loadFavorites()
-              this.loadCommissions()
-            } else {
-              wx.showToast({ title: (res && res.message) || '登录失败', icon: 'none' })
+        return new Promise((resolve, reject) => {
+          wx.login({
+            success: (wxRes) => {
+              // #region agent log
+              console.log('[DEBUG-3ffe2d] [CONFIRM-2] wx.login success, code=', wxRes.code ? 'got' : 'empty')
+              // #endregion
+              if (!wxRes.code) return reject(new Error('wx.login 未返回 code'))
+              resolve({ code: wxRes.code, avatarUrl })
+            },
+            fail: (err) => {
+              // #region agent log
+              console.error('[DEBUG-3ffe2d] [CONFIRM-E] wx.login fail:', err)
+              // #endregion
+              reject(err)
             }
           })
-          .catch((err) => {
-            // #region agent log
-            console.error('[DEBUG-3ffe2d] [CONFIRM-E] POST /wx/login failed:', err)
-            // #endregion
-            wx.hideLoading()
-            // 网络失败时兜底：仅写本地，保证体验不中断
-            const userInfo = { nickName: nickname, avatarUrl: avatar }
-            wx.setStorageSync('userInfo', userInfo)
-            this.setData({
-              userInfo,
-              isLogin: true,
-              showLoginModal: false,
-              tempAvatar: '',
-              tempNickname: ''
-            })
-            wx.showToast({ title: '已离线登录', icon: 'none' })
-          })
-      },
-      fail: (err) => {
+        })
+      })
+      .then(({ code, avatarUrl }) => {
+        return post('/wx/login', { code, nickname, avatar: avatarUrl })
+          .then(res => ({ res, avatarUrl }))
+      })
+      .then(({ res, avatarUrl }) => {
         // #region agent log
-        console.error('[DEBUG-3ffe2d] [CONFIRM-E] wx.login fail:', err)
+        console.log('[DEBUG-3ffe2d] [CONFIRM-3] POST /wx/login response:', JSON.stringify(res))
         // #endregion
         wx.hideLoading()
-        wx.showToast({ title: '微信登录失败', icon: 'none' })
-      }
-    })
+        if (res && res.code === 200 && res.data) {
+          const token = res.data.token
+          const userInfo = {
+            id: res.data.userInfo && res.data.userInfo.id,
+            nickName: nickname,
+            avatarUrl
+          }
+          wx.setStorageSync('token', token)
+          wx.setStorageSync('userInfo', userInfo)
+          app.globalData.token = token
+          app.globalData.userInfo = userInfo
+          this.setData({
+            userInfo,
+            isLogin: true,
+            showLoginModal: false,
+            tempAvatar: '',
+            tempNickname: ''
+          })
+          wx.showToast({ title: '登录成功', icon: 'success' })
+          this.loadFavorites()
+          this.loadCommissions()
+        } else {
+          wx.showToast({ title: (res && res.message) || '登录失败', icon: 'none' })
+        }
+      })
+      .catch(err => {
+        // #region agent log
+        console.error('[DEBUG-3ffe2d] [CONFIRM-E] login flow failed:', err)
+        // #endregion
+        wx.hideLoading()
+        const msg = (err && err.message) || '登录失败，请重试'
+        wx.showToast({ title: msg, icon: 'none', duration: 2500 })
+      })
   },
 
   onLogout() {
@@ -322,9 +333,13 @@ Page({
         if (res.confirm) {
           wx.removeStorageSync('userInfo')
           wx.removeStorageSync('token')
+          app.globalData.token = ''
+          app.globalData.userInfo = null
           this.setData({
             userInfo: null,
-            isLogin: false
+            isLogin: false,
+            tempAvatar: '',
+            tempNickname: ''
           })
           wx.showToast({ title: '已退出登录', icon: 'none' })
         }
